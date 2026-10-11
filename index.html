@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="dark">
   <meta name="theme-color" content="#101419">
-  <title>Tabletop Command v8.1 — Tabletop Army Builder & Match Companion</title>
+  <title>Tabletop Command v9 — Build Armies & Play Together</title>
   <style>:root{--bg:#0c1015;--sidebar:#12171c;--panel:#171e25;--panel2:#1c252d;--field:#101820;--line:#2a343d;--line2:#35414a;--text:#f0eee8;--muted:#a2aeb7;--faint:#71818e;--gold:#cfaa66;--gold2:#eac88d;--wine:#713840;--blue:#81a9c3;--red:#e18b85;--green:#8fc8a9;--shadow:0 12px 36px #0005;--radius:12px}
 *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--bg);color:var(--text);font:14px/1.48 system-ui,-apple-system,'Segoe UI',sans-serif}button,input,select,textarea{font:inherit}button{cursor:pointer}button:disabled{opacity:.44;cursor:not-allowed}a{color:var(--gold2)}.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)}
 .app-shell{display:grid;grid-template-columns:238px minmax(0,1fr);min-height:100vh}.sidebar{position:sticky;top:0;height:100vh;background:var(--sidebar);border-right:1px solid var(--line);padding:24px 14px 16px;display:flex;flex-direction:column;z-index:5}.brand{display:flex;align-items:center;gap:11px;padding:4px 9px 29px}.brand-mark{width:38px;height:38px;display:grid;place-items:center;background:linear-gradient(135deg,#77533a,#bf9a5c);color:#17191b;font-size:26px;font-weight:900;clip-path:polygon(50% 0,96% 25%,96% 75%,50% 100%,4% 75%,4% 25%)}.brand strong{display:block;font-size:13px;letter-spacing:1.65px}.brand small{display:block;color:var(--faint);font-size:9px;letter-spacing:1.3px;margin-top:2px}.section-label{color:var(--faint);font-weight:750;font-size:10px;letter-spacing:1.5px;padding:0 14px;margin-bottom:12px}.section-gap{margin-top:23px}.main-nav{display:grid;gap:4px}.nav-link{border:0;background:transparent;color:#b7c0c7;text-align:left;padding:12px 14px;border-radius:9px;display:flex;align-items:center;gap:12px;font-weight:600;width:100%;transition:.15s}.nav-link:hover{background:#ffffff0b;color:#fff}.nav-link.active{background:linear-gradient(90deg,#a77f4433,#93734709);color:var(--gold2);border:1px solid #a77f4440}.nav-icon{display:inline-grid;place-items:center;font-size:19px;width:21px;line-height:1}.sidebar-bottom{margin-top:auto;color:var(--faint);font-size:11px;padding:0 8px}.sidebar-bottom p{line-height:1.5}.status-indicator{color:#b5bebc;font-size:11px}.live-dot{display:inline-block;background:var(--green);width:7px;height:7px;border-radius:100%;margin-right:7px;box-shadow:0 0 0 3px #8fc8a916}.version-text{border-top:1px solid var(--line);padding-top:14px;margin-top:16px;letter-spacing:1.2px;font-size:10px}.main-column{min-width:0;display:flex;flex-direction:column}.topbar{position:sticky;top:0;z-index:4;background:#10161be8;backdrop-filter:blur(14px);border-bottom:1px solid var(--line);height:73px;display:flex;align-items:center;gap:16px;padding:0 30px}.breadcrumbs{display:flex;align-items:center;gap:12px;white-space:nowrap;min-width:0}.breadcrumbs span:first-child{font-size:10px;letter-spacing:1.4px;color:var(--faint);font-weight:750}.breadcrumbs b{font-size:14px;font-weight:650;overflow:hidden;text-overflow:ellipsis}.crumb-divider{color:var(--faint)}.top-actions{margin-left:auto;display:flex;align-items:center;gap:18px}.force-switcher{width:210px;background:#1b242b;border:1px solid #35414a;border-radius:8px;padding:9px 12px;color:var(--text);font-weight:650}.autosave{font-size:10px;letter-spacing:.9px;color:var(--faint);white-space:nowrap}.content{width:100%;max-width:1540px;margin:0 auto;padding:36px 36px 64px;flex:1}.footer{margin-top:auto;border-top:1px solid var(--line);padding:16px 36px 22px;color:var(--faint);font-size:11px}.mobile-menu{display:none}
@@ -147,7 +147,8 @@
   <div class="tooltip" id="ruleTooltip" role="tooltip" hidden></div>
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
   <input type="file" id="importFile" accept="application/json,.json" hidden>
-  <script>/* COMMAND DECK — local-only tabletop datasheet and narrative campaign manager.
+  <script src="config.js"></script>
+<script>/* COMMAND DECK — local-only tabletop datasheet and narrative campaign manager.
    All library material is customizable campaign reference content; no external APIs. */
 (() => {
 'use strict';
@@ -1956,6 +1957,187 @@ const v81Css=document.createElement('style');v81Css.textContent=`
 `;document.head.appendChild(v81Css);
 const v81Brand=$('.brand small');if(v81Brand)v81Brand.textContent='ARMY BUILDER & MATCH COMPANION · v8.1';
 const v81Version=$('.version-text');if(v81Version)v81Version.textContent='TABLETOP COMMAND · v8.1 · GITHUB PAGES READY';
+
+
+// ===== Tabletop Command v9: verified-reference corrections and online rooms =====
+// Summarized mechanics and numeric characteristics, not copies of third-party written rules.
+const V9_REVIEWED={
+ 'Aggressor Squad':{points:90,costs:{3:90,6:180},url:'https://www.wahapedia.ru/wh40k11ed/factions/space-marines/Aggressor-Squad',asof:'2026-10-11'},
+ 'Intercessor Squad':{points:85,costs:{5:85,10:170},url:'https://www.wahapedia.ru/wh40k11ed/factions/space-marines/Intercessor-Squad',asof:'2026-10-11'},
+ 'Assault Intercessor Squad':{points:85,costs:{5:85,10:170},url:'https://www.wahapedia.ru/wh40k11ed/factions/space-marines/Assault-Intercessor-Squad',asof:'2026-10-11'},
+ 'Heavy Intercessor Squad':{points:115,costs:{5:115,10:230},url:'https://www.wahapedia.ru/wh40k11ed/factions/space-marines/Heavy-Intercessor-Squad',asof:'2026-10-11'},
+ 'Bladeguard Veteran Squad':{points:90,costs:{3:90,6:180},third:{3:110,6:200},url:'https://www.wahapedia.ru/wh40k11ed/factions/space-marines/Bladeguard-Veteran-Squad',asof:'2026-10-11'},
+ 'Eradicator Squad with Melta Rifles':{points:100,costs:{3:100,6:200},third:{3:120,6:220},url:'https://www.wahapedia.ru/wh40k11ed/factions/space-marines/Eradicator-Squad-with-Melta-Rifles',asof:'2026-10-11'},
+ 'Redemptor Dreadnought':{points:170,costs:{1:170},third:{1:190},upgrade:'Macro plasma incinerator: +10 pts where applicable.',url:'https://www.wahapedia.ru/wh40k11ed/factions/space-marines/Redemptor-Dreadnought',asof:'2026-10-11'},
+ 'Terminator Squad':{points:190,costs:{5:190,10:380},url:'https://www.wahapedia.ru/wh40k11ed/factions/space-marines/Terminator-Squad',asof:'2026-10-11'}
+};
+// Per-copy surcharges from reviewed October 2026 points references.
+Object.assign(V7_EXTRA_COPY,{
+ 'Aggressor Squad':[3,10], 'Eradicator Squad with Melta Rifles':[3,20],
+ 'Bladeguard Veteran Squad':[3,20], 'Redemptor Dreadnought':[3,20]
+});
+// Only change local reference fields that have been individually reviewed.
+for(const [name,ref] of Object.entries(V9_REVIEWED)){
+ V7_SOURCE[name]=ref.url;
+ if(V7_DETAILS[name])V7_DETAILS[name].points=ref.points;
+ V7_SIZES[name]=ref.costs;
+}
+V7_DETAILS['Intercessor Squad'].abilities=[
+ ['Bolter Discipline','Shooting phase: gain +1 to ranged Hit rolls if this squad OR its chosen target is in range of an objective marker. Otherwise use normal Hit rolls.'],
+ ['Tactical Mainstay','This squad can start mission actions even when engaged or Battle-shocked, provided other action conditions are met. Starting an action does not stop this squad shooting.']
+];
+V7_DETAILS['Heavy Intercessor Squad'].points=115;
+V7_DETAILS['Assault Intercessor Squad'].points=85;
+V7_DETAILS['Bladeguard Veteran Squad'].points=90;
+V7_DETAILS['Eradicator Squad with Melta Rifles'].points=100;
+V7_DETAILS['Redemptor Dreadnought'].points=170;
+V7_DETAILS['Redemptor Dreadnought'].abilities=[['Duty Eternal','When an enemy attack has Strength higher than this Dreadnought’s Toughness (T10), subtract 1 from that attack’s Wound roll. Example: S12 vs T10 would normally wound on a 3+; with this ability it requires a 4+, before other modifiers.']];
+V7_DETAILS['Bladeguard Veteran Squad'].abilities=[['Bladeguard','Once each turn, when this squad fights or an enemy selects it as a target in the Fight phase, choose either +1 to this squad’s melee Hit rolls OR -1 to incoming Hit rolls against it. Apply the chosen effect for that fight.']];
+V7_DETAILS['Eradicator Squad with Melta Rifles'].abilities=[['Total Obliteration','When resolving this squad’s ranged attacks, you may re-roll the damage roll. This does not grant a re-roll to Hit or Wound rolls.']];
+V7_DETAILS['Terminator Squad']={points:190,models:5,min:5,max:10,inv:'4+',stats:['5"',6,'2+',3,'6+',1],words:['INFANTRY','TERMINATOR','IMPERIUM','ADEPTUS ASTARTES'],weapons:[
+ ['Storm bolter','24"','2','3+','5','-1','1','Rapid Fire 2'],['Assault cannon','24"','6','3+','6','-2','1','Sustained Hits 1'],['Cyclone missile launcher · frag','36"','8','3+','4','-1','1','Blast 2'],['Cyclone missile launcher · krak','36"','2','3+','10','-2','D3+3',''],['Heavy flamer','12"','3','—','5','-1','1','Torrent, Blast 2'],['Power fist','Melee','3','3+','8','-2','2','']],
+ abilities:[['Fury of the First','An attack made by this unit improves its AP by 1 when the target unit is within 9 inches (for example AP -1 becomes AP -2).'],['Teleport Homer','Once per battle, after placing its teleport homer before the game, you can use Rapid Ingress on this unit at 1 CP less; place it within 3 inches of the homer and more than 8 inches from enemies. Enemy models moving within 1 inch can remove the homer.']],loadout:'One Sergeant and four to nine Terminators. Heavy weapon substitutions are limited by squad size. Deep Strike and a 4+ invulnerable save. Check which individual models carry each listed weapon.'};
+// Ultramarines named characters reviewed against October 2026 11th edition references.
+V7_DETAILS['Chief Librarian Tigurius']={points:115,models:1,inv:'4+',stats:['6"',5,'3+',5,'6+',1],words:['INFANTRY','CHARACTER','EPIC HERO','PSYKER','TACTICUS','ULTRAMARINES','ADEPTUS ASTARTES'],weapons:[
+ ['Bolt pistol','12"','1','2+','5','-1','1','Close-quarters'],['Storm of the Emperor’s Wrath','18"','D3+6','2+','6','-2','2','Psychic, Blast 1'],['Rod of Tigurius','Melee','5','2+','7','-2','2','Psychic']],abilities:[
+ ['Prescience (psychic level 2)','Movement phase: if not Battle-shocked, roll a D6. On a result of 1, Tigurius becomes Battle-shocked; the +1 to this unit’s save rolls lasts until the start of your next turn.'],
+ ['Telepathic Assault (psychic level 1)','Shooting phase: if not Battle-shocked, roll a D6; on a result of 1, Tigurius becomes Battle-shocked. Choose a visible enemy within 24 inches to suffer 2D3 mortal wounds.'],
+ ['Hood of Hellfire','Against psychic attacks and mortal wounds, this unit receives Feel No Pain 4+ (ignore each eligible wound on a 4+).'],
+ ['Librarius (level 3)','May use psychic abilities totalling at most psychic level 3 in a battle round, subject to the normal restrictions.']],loadout:'Named Ultramarines epic hero; one model. Bolt pistol, storm of the Emperor’s Wrath and Rod of Tigurius. Leader for eligible Space Marine infantry.'};
+V7_SOURCE['Chief Librarian Tigurius']='https://www.wahapedia.ru/wh40k11ed/factions/space-marines/Chief-Librarian-Tigurius';
+V9_REVIEWED['Chief Librarian Tigurius']={points:115,costs:{1:115},url:V7_SOURCE['Chief Librarian Tigurius'],asof:'2026-10-11'};
+V7_DETAILS['Marneus Calgar']={points:180,models:1,inv:'4+',stats:['6"',6,'2+',6,'6+',1],words:['INFANTRY','CHAPTER MASTER','CHARACTER','EPIC HERO','TERMINATOR','ULTRAMARINES','ADEPTUS ASTARTES'],weapons:[
+ ['Gauntlets of Ultramar · ranged','18"','4','2+','5','-2','2','Close-quarters, Twin-linked'],['Gauntlets of Ultramar · melee','Melee','6','2+','10','-3','3','Twin-linked'],['Overhead smash (extra)','Melee','1','2+','14','-3','D3+3','Extra Attacks, Twin-linked']],abilities:[
+ ['Codex Adept','The Assault, Devastator and Tactical combat doctrines are all active for Calgar’s own unit.'],
+ ['Master Tactician','Movement phase: choose a visible friendly Adeptus Astartes unit within 9 inches of Calgar and pick one Combat Doctrine; that doctrine is active for the target until the start of your next Command phase.'],
+ ['Thunderhawk Insertion','During Declare Battle Formations, give Deep Strike to one chosen friendly Gravis, Phobos or Tacticus unit.']],loadout:'Named Ultramarines Chapter Master with gauntlets. Deep Strike and Leader. The model’s selectable attached units and detachment restrictions must still be checked.'};
+V7_SOURCE['Marneus Calgar']='https://wahapedia.ru/wh40k11ed/factions/space-marines/Marneus-Calgar';
+V9_REVIEWED['Marneus Calgar']={points:180,costs:{1:180},url:V7_SOURCE['Marneus Calgar'],asof:'2026-10-11'};
+// Replace outdated or mismatched named index records with their reviewed names.
+// Old Marneus Calgar in Armour of Antilochus remains a separate archive-style catalogue entry.
+
+// Normalize the displayed catalogue cost against the reviewed profile, including special Chapter entries.
+const V9_PREV_CATALOG=v7Catalog;
+v7Catalog=function(){
+ const list=V9_PREV_CATALOG().filter(u=>u.name!=='Marneus Calgar in Armour of Antilochus');
+ for(const [name,ref] of Object.entries(V9_REVIEWED)){
+   let ix=list.findIndex(u=>u.name===name && ['Space Marines','Ultramarines'].includes(v7Faction(u)));
+   const profile=V7_DETAILS[name];
+   if(ix>=0){const custom=data.customPoints?.[v7Faction(list[ix])+'|'+name];list[ix]={...list[ix],points:(Number(custom)>0?Number(custom):ref.points),pointsStatus:'2026-10-11 reviewed reference',pointsNote:'Checked October 11, 2026 — verify updates',v7Rich:profile,models:profile?.models||list[ix].models};}
+   else if(profile){list.push({id:'v9-verified-'+name.toLowerCase().replace(/[^a-z0-9]+/g,'-'),name,faction:name==='Chief Librarian Tigurius'||name==='Marneus Calgar'?'Ultramarines':'Space Marines',category:name==='Chief Librarian Tigurius'||name==='Marneus Calgar'?'Character':'Infantry',type:name==='Chief Librarian Tigurius'||name==='Marneus Calgar'?'Character':'Infantry',points:ref.points,pointsStatus:'2026-10-11 reviewed reference',pointsNote:'Checked October 11, 2026',models:profile.models,role:'Reviewed 11th-edition reference. Consult full current datasheet for exact army restrictions.',sourceType:'reference',v7Rich:profile,stats:Object.fromEntries(['move','toughness','save','wounds','leadership','oc'].map((k,i)=>[k,profile.stats[i]]))});}
+ }
+ return list;
+};
+
+// Current 2026 public references use per-copy costs on some units; inform users that a flat displayed cost can be insufficient.
+const V9_PREV_PROFILE=v7Profile;
+v7Profile=function(u){let html=V9_PREV_PROFILE(u),r=V9_REVIEWED[u.name];if(!r)return html;
+ const note=`<div class="v9-source-note"><b>Mechanics checked ${esc(r.asof)}</b> · <a target="_blank" rel="noopener noreferrer" href="${esc(r.url)}">Reference datasheet ↗</a> · <a target="_blank" rel="noopener noreferrer" href="${esc(V7_OFFICIAL_POINTS)}">Official points ↗</a><p>Points: ${Object.entries(r.costs).map(([m,p])=>m+' models '+p+' pts').join('; ')}.${r.third?` Third and subsequent copies: ${Object.entries(r.third).map(([m,p])=>m+' models '+p+' pts').join('; ')}.`:''}${r.upgrade?' '+esc(r.upgrade):''} Confirm wargear, mission legality, and updates before playing. This website summarizes effects rather than reproducing official rulebook text.</p></div>`;
+ return html.replace('<h3>Keywords</h3>',note+'<h3>Keywords</h3>');
+};
+const V9_PREV_POINTS=v7Points;
+v7Points=function(u){const ref=V9_REVIEWED[u.name];if(ref){const custom=data.customPoints?.[v7Faction(u)+'|'+u.name];return {...V9_PREV_POINTS(u),text:(Number(custom)>0?Number(custom):ref.points)+' pts',flag:Number(custom)>0?'Personal points override':'Reviewed Oct 2026'};}return V9_PREV_POINTS(u);};
+const V9_PREV_CARD=v7Card;
+v7Card=function(u,active=false){let html=V9_PREV_CARD(u,active);if(!V9_REVIEWED[u.name])return html;return html.replace('Index only</small>','Reviewed</small>').replace('Detailed</small>','Reviewed</small>');};
+// Keep the live game linked to the current reference when shown inside existing offline matches.
+const V9_PREV_SIMPLE=ttSimpleUnit;
+ttSimpleUnit=function(u){let h=V9_PREV_SIMPLE(u),r=V9_REVIEWED[u.name];return r?h+`<p class="v9-source-note">Reference checked ${esc(r.asof)} · <a target="_blank" rel="noopener noreferrer" href="${esc(r.url)}">Current datasheet ↗</a></p>`:h;};
+
+// MULTIPLAYER ROOMS. Works only after a Supabase project and SQL setup.
+const v9={room:null,connected:false,client:null,session:null,channel:null,busy:false,playerName:'',armyId:'',joinCode:new URLSearchParams(location.search).get('room')||'',error:'',ready:false};
+const v9Config=()=>{
+ let local={};try{local=JSON.parse(localStorage.getItem('tabletop_supabase_public_config')||'{}')}catch{}
+ let cfg=window.TABLETOP_SUPABASE_CONFIG||{};return {url:String(local.url||cfg.url||'').trim(),publishableKey:String(local.publishableKey||cfg.publishableKey||'').trim()};
+};
+function v9Configured(){const c=v9Config();return /^https:\/\/[a-z0-9-]+\.supabase\.co\/?$/i.test(c.url)&&c.publishableKey.length>12;}
+function v9Error(err){v9.error=err?.message||String(err);v9.busy=false;render();toast('Online match: '+v9.error);}
+async function v9LoadClient(){
+ if(v9.client)return v9.client;
+ if(!v9Configured())throw Error('Supabase is not configured yet. Site owner: add the public Project URL and publishable key to config.js.');
+ if(!window.supabase?.createClient)await new Promise((resolve,reject)=>{
+  let script=document.createElement('script');script.src='https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js';script.onload=resolve;script.onerror=()=>reject(Error('Unable to load Supabase client; check your internet connection.'));document.head.appendChild(script);
+ });
+ const c=v9Config();v9.client=window.supabase.createClient(c.url,c.publishableKey,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:false}});
+ let {data:{session},error}=await v9.client.auth.getSession();if(error)throw error;
+ if(!session){const res=await v9.client.auth.signInAnonymously();if(res.error)throw res.error;session=res.data.session;}
+ v9.session=session;v9.connected=true;return v9.client;
+}
+function v9RoomArmy(){const army=data.savedArmies?.find(a=>a.id===v9.armyId);return (army?.army||[]).slice(0,80).map(u=>{
+ const models=Math.max(1,Math.min(60,Number(u.models)||1));
+ const w=Math.max(1,Math.min(30,Number(u.woundsEach)||Number(u.stats?.wounds)||1));
+ return {id:String(u.id||uid('ru')).slice(0,120),name:String(u.name||'Unit').slice(0,80),models,woundsEach:w,hp:models*w,shock:false,points:Math.max(0,Math.min(5000,Number(u.points)||0)),faction:String(u.faction||army?.faction||'').slice(0,60)};
+ });}
+function v9MySide(){if(!v9.room||!v9.session)return 'p1';return v9.room.host_id===v9.session.user.id?'p1':'p2';}
+function v9MyRoom(){return v9.room?.state||null;}
+function v9Link(){return `${location.origin}${location.pathname}?room=${encodeURIComponent(v9.room?.invite_code||'')}`;}
+async function v9FetchRoom(id){const client=await v9LoadClient();const {data:room,error}=await client.from('tc_rooms').select('*').eq('id',id).single();if(error)throw error;v9.room=room;render();}
+function v9Subscribe(){
+ if(!v9.client||!v9.room)return;
+ if(v9.channel){v9.client.removeChannel(v9.channel);v9.channel=null;}
+ const roomId=v9.room.id;
+ v9.channel=v9.client.channel('tc-room-'+roomId).on('postgres_changes',{event:'UPDATE',schema:'public',table:'tc_rooms',filter:'id=eq.'+roomId},payload=>{
+  if(payload.new&&payload.new.id===roomId){v9.room=payload.new;if(ui.route==='online')render();}
+ }).subscribe();
+}
+async function v9ConnectRoom(mode){
+ v9.busy=true;v9.error='';render();
+ try{
+  const client=await v9LoadClient();let res;
+  if(mode==='create')res=await client.rpc('tc_create_room',{p_name:v9.playerName||'Player 1',p_army:v9RoomArmy()});
+  else res=await client.rpc('tc_join_room',{p_code:v9.joinCode.toUpperCase().trim(),p_name:v9.playerName||'Player 2',p_army:v9RoomArmy()});
+  if(res.error)throw res.error;v9.room=res.data;v9.busy=false;v9Subscribe();render();
+  if(mode==='create')toast('Match room created. Share the invitation link.');else toast('Joined match!');
+ }catch(error){v9Error(error);}
+}
+async function v9Apply(action){if(!v9.room||v9.busy)return;v9.busy=true;v9.error='';try{
+ const client=await v9LoadClient();const {data:room,error}=await client.rpc('tc_apply_action',{p_room_id:v9.room.id,p_action:action});
+ if(error)throw error;v9.room=room;v9.busy=false;render();
+ }catch(error){v9Error(error);}}
+async function v9Refresh(){if(!v9.room)return;v9.busy=true;try{await v9FetchRoom(v9.room.id);v9.busy=false;render();}catch(e){v9Error(e);}}
+function v9UnitRow(u,side,editable){const hp=Math.max(0,Number(u.hp)||0),w=Math.max(1,Number(u.woundsEach)||1),models=Math.max(1,Number(u.models)||1),alive=Math.ceil(hp/w),front=hp?((hp-1)%w)+1:0;
+ return `<article class="v9-unit"><div><strong>${esc(u.name)}</strong><div class="tiny muted">${alive}/${models} models remaining · ${front}/${w} W on front model · ${esc(u.points||'—')} pts ${u.shock?'<span class="badge red">BATTLE-SHOCKED</span>':''}</div></div>${editable?`<div class="actions"><button class="btn ghost small" data-v9-act="damage" data-id="${esc(u.id)}" ${hp===0?'disabled':''}>−1 W</button><button class="btn ghost small" data-v9-act="heal" data-id="${esc(u.id)}" ${hp>=w*models?'disabled':''}>+1 W</button><button class="btn ${u.shock?'danger':'ghost'} small" data-v9-act="shock" data-id="${esc(u.id)}">${u.shock?'Clear shock':'Battle-shock'}</button></div>`:'<span class="tiny muted">Opponent manages this unit</span>'}</article>`;
+}
+function v9RoomView(){let r=v9MyRoom(),side=v9MySide(),host=side==='p1',ready=r?.p1?.ready&&r?.p2?.ready,phase=r?.phase||'Command',link=v9Link();return `${heading('LIVE SHARED BATTLE','Online match room','Both players see changes to CP, VP, wounds, Battle-shock and phase. Physical positioning and complex rules remain player decisions.',`<button class="btn ghost" data-v9-act="leave">Leave view</button>`)}
+ <div class="v9-banner"><div><div class="eyebrow">PRIVATE ROOM · ${esc(v9.room.invite_code)}</div><strong>${v9.room.guest_id?'Two players joined':'Waiting for opponent'}</strong><p class="tiny muted">Room privacy is controlled by Supabase membership policies. Anyone who gets the invite code can claim the open second slot.</p></div><div class="actions"><button class="btn primary" data-v9-act="copy">Copy invitation</button><button class="btn ghost" data-v9-act="refresh">Refresh</button></div></div>
+ <div class="v9-scoreboard">${['p1','p2'].map(s=>`<section class="card card-pad"><div class="eyebrow">${s==='p1'?'HOST':'GUEST'}${s===side?' · YOU':''}</div><h2>${esc(r?.[s]?.name||'Waiting')}</h2><div class="v9-numbers"><div><strong>${r?.[s]?.cp??0}</strong><small>CP</small></div><div><strong>${r?.[s]?.vp??0}</strong><small>VP</small></div></div>${s===side?`<div class="actions"><button class="btn ghost small" data-v9-act="cp" data-delta="-1">− CP</button><button class="btn ghost small" data-v9-act="cp" data-delta="1">+ CP</button><button class="btn ghost small" data-v9-act="vp" data-delta="-1">− VP</button><button class="btn ghost small" data-v9-act="vp" data-delta="1">+ VP</button><button class="btn small ${r?.[s]?.ready?'primary':'ghost'}" data-v9-act="ready">${r?.[s]?.ready?'Ready ✓':'Mark ready'}</button></div>`:''}</section>`).join('')}</div>
+ <section class="card card-pad v9-phase"><div><span class="eyebrow">ROUND ${r?.round||1} · ${esc(r?.turn==='p1'?r.p1.name:r.p2.name)} TURN</span><h2>${esc(phase)} phase</h2><p class="muted">${esc(v9PhaseText[phase]||'Resolve actions with the current rules and both players.')}</p><small class="muted">${!v9.room.guest_id?'Invite the second player to begin.':!ready?'Both players can mark ready before beginning.':'Both players ready.'}</small></div><button class="btn primary" data-v9-act="phase" ${!v9.room.guest_id||!ready||r?.finished?'disabled':''}>Next phase →</button></section>
+ ${['p1','p2'].map(s=>`<section class="card card-pad v9-roster"><div class="v7-panel-head"><h3>${esc(r?.[s]?.name||'Player')}’s units</h3><span class="muted">${r?.[s]?.army?.length||0} squads</span></div>${(r?.[s]?.army||[]).map(u=>v9UnitRow(u,s,s===side&&!r.finished)).join('')||'<div class="empty">No army loaded. Saved army can be selected when creating or joining a room.</div>'}</section>`).join('')}
+ <section class="card card-pad"><h3>Match journal</h3><div class="actions"><button class="btn ghost small" data-v9-act="note">Write note</button>${host&&!r?.finished?'<button class="btn danger small" data-v9-act="finish">Finish match</button>':''}</div>${(r?.log||[]).slice().reverse().slice(0,16).map(x=>`<p class="v9-log"><span>${new Date(x.at).toLocaleTimeString()}</span> ${esc(x.text)}</p>`).join('')}</section><p class="tiny muted">Online mode uses its own room state. Offline and online records are separate in this release; JSON backup remains available for the local armies.</p>`;}
+const v9PhaseText={Command:'Gain CP and resolve command abilities. Check any Battle-shock tests required by the mission; players track results below.',Movement:'Move eligible units, resolve Advances and Fall Backs, and place reinforcements according to your rules.',Shooting:'Select an eligible shooting unit and enemy target, check range and line of sight, then roll Hit → Wound → Save → Damage.',Charge:'Declare legal charge targets, roll the required charge distance, and move eligible models.',Fight:'Select eligible fighting units, resolve pile-in, melee Hit → Wound → Save → Damage, and consolidate.'};
+function v9OnlinePage(){const configured=v9Configured();let armies=data.savedArmies||[],options=`<option value="">Use a blank roster / practice match</option>`+armies.map(a=>`<option value="${esc(a.id)}" ${v9.armyId===a.id?'selected':''}>${esc(a.name)} · ${esc(a.faction||'')} · ${ttCost(a.army||[])} pts</option>`).join('');
+ if(v9.room)return v9RoomView();
+ return `${heading('PUBLIC TABLETOP COMPANION','Play online with friends','Create a private two-player room. Each player picks their own locally saved army, then both see synced scores, wounds and turn progress.')}<div class="v9-intro"><strong>How it works</strong><p>1. Build and save an army under My Saved Armies. 2. Create a room and copy the link. 3. Your friend opens it on their device and joins using their own army. 4. Both track the match here.</p></div>
+ ${!configured?`<div class="v8-page-note"><strong>Online rooms need one-time Supabase configuration by the site owner.</strong><p>Run the included <code>supabase_setup.sql</code> in your Supabase SQL Editor, enable anonymous authentication, and put your project’s PUBLIC URL and publishable key in <code>config.js</code> in the GitHub repository. Never upload the database password or a service-role key. Until then, offline army building and battles continue to work.</p></div>`:''}
+ <div class="v9-pick"><label>Your display name<input class="field" maxlength="40" data-v9-input="name" placeholder="e.g. Owen" value="${esc(v9.playerName)}"></label><label>Your saved army<select class="field" data-v9-input="army">${options}</select></label><p class="tiny muted">Your opponent selects a separate army on their own device. Unverified datasheets still require checking.</p></div>
+ <div class="v9-two"><section class="card card-pad"><div class="eyebrow">HOST A MATCH</div><h2>Create room</h2><p class="muted">Creates an invitation code. Two players can join from separate browsers.</p><button class="btn primary" data-v9-act="create" ${!configured||v9.busy?'disabled':''}>Create online match</button></section>
+ <section class="card card-pad"><div class="eyebrow">JOIN A FRIEND</div><h2>Join room</h2><p class="muted">Paste the short code or open the invitation link they sent.</p><input class="field" data-v9-input="code" maxlength="24" placeholder="ROOM CODE" value="${esc(v9.joinCode)}"><button class="btn primary" data-v9-act="join" ${!configured||v9.busy?'disabled':''}>Join match</button></section></div>
+ ${v9.error?`<div class="v7-warning">${esc(v9.error)}</div>`:''}<p class="tiny muted">Rooms are private to their two participants after joining. Anonymous sessions are tied to this browser; clearing its storage can remove your ability to rejoin that room. Shared persistent accounts and room recovery are future enhancements.</p>`;
+}
+const v9OnlineNav=document.createElement('button');v9OnlineNav.className='nav-link';v9OnlineNav.dataset.route='online';v9OnlineNav.textContent='◎ Play online with friends';
+const v9NavLive=$('[data-route="live"]');if(v9NavLive)v9NavLive.insertAdjacentElement('afterend',v9OnlineNav);
+const V9_PREV_RENDER=render;
+render=function(){if(ui.route==='online'){$$('.nav-link').forEach(b=>b.classList.toggle('active',b.dataset.route==='online'));$('#breadcrumb').textContent='Online rooms';$('#forceSwitcher').style.display='none';$('#appContent').innerHTML=v9OnlinePage();return;}V9_PREV_RENDER();};
+const V9_PREV_HOME=v7Home;
+v7Home=function(){let h=V9_PREV_HOME();return h.replace('</section>',`</section><div class="v9-home-online"><div><div class="eyebrow">NEW · ONLINE BATTLES</div><h3>Start a shared match with a friend</h3><p>Invite a second player with a link. Both can track turns, wounds, Battle-shock, CP and VP live.</p></div><button class="btn primary" data-route="online">Play online →</button></div>`);};
+document.addEventListener('change',e=>{let t=e.target.dataset.v9Input;if(!t)return;e.stopImmediatePropagation();if(t==='army')v9.armyId=e.target.value;else if(t==='name')v9.playerName=e.target.value;else if(t==='code')v9.joinCode=e.target.value;render();},true);
+document.addEventListener('input',e=>{let t=e.target.dataset.v9Input;if(t==='name')v9.playerName=e.target.value;if(t==='code')v9.joinCode=e.target.value;},true);
+window.addEventListener('click',e=>{let b=e.target.closest('[data-v9-act]');if(!b)return;e.stopImmediatePropagation();e.preventDefault();let kind=b.dataset.v9Act;
+ if(kind==='create'||kind==='join')return v9ConnectRoom(kind);
+ if(kind==='copy'){navigator.clipboard?.writeText(v9Link()).then(()=>toast('Invitation copied.')).catch(()=>prompt('Copy invitation link:',v9Link()));return;}
+ if(kind==='refresh')return v9Refresh();
+ if(kind==='leave'){if(v9.channel){v9.client?.removeChannel(v9.channel);v9.channel=null;}v9.room=null;render();return;}
+ if(kind==='note'){let input=prompt('Short match note (max 180 characters):');if(input)return v9Apply({type:'note',text:input.slice(0,180)});return;}
+ if(kind==='finish'){if(confirm('Finish the shared match? This cannot be undone in this release.'))v9Apply({type:'finish'});return;}
+ if(['cp','vp','damage','heal','shock','phase','ready'].includes(kind))return v9Apply({type:kind,delta:Number(b.dataset.delta||0),unit_id:b.dataset.id||'',amount:1});
+},true);
+const v9Styles=document.createElement('style');v9Styles.textContent=`
+ .v9-home-online{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:24px;border:1px solid #477f8e;background:linear-gradient(120deg,#173440,#1a252f);border-radius:12px;margin:18px 0 28px}.v9-home-online h3{font:27px Georgia,serif;margin:8px 0}.v9-home-online p{color:var(--muted);margin:3px 0}
+ .v9-intro,.v9-source-note,.v9-banner{border-radius:10px;border:1px solid #466478;background:#172932;padding:15px;margin:12px 0 20px}.v9-source-note{font-size:12px;color:#cddfe8}.v9-source-note p{margin:7px 0 0;line-height:1.7}.v9-pick{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:20px 0}.v9-pick label{display:grid;gap:6px;font-weight:700}.v9-pick p{grid-column:1/-1;margin:0}.v9-two,.v9-scoreboard{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}.v9-two .card{display:grid;align-content:start;gap:12px}.v9-two .card h2{margin:0}.v9-two .card p{margin:0}.v9-banner{display:flex;justify-content:space-between;gap:15px;align-items:center}.v9-banner strong{font-size:19px}.v9-banner p{margin:6px 0 0}.v9-scoreboard h2{margin:8px 0 16px}.v9-numbers{display:flex;gap:28px;margin:10px 0 17px}.v9-numbers div{display:flex;gap:6px;align-items:baseline}.v9-numbers strong{font-size:32px;font-variant-numeric:tabular-nums}.v9-numbers small{color:var(--muted)}.v9-phase{display:flex;align-items:center;justify-content:space-between;gap:20px;margin:18px 0}.v9-phase h2{margin:7px 0}.v9-phase p{max-width:740px}.v9-roster{margin:14px 0}.v9-unit{display:flex;justify-content:space-between;align-items:center;gap:12px;border-top:1px solid var(--line);padding:13px 0}.v9-unit strong{font-size:14px}.v9-unit .actions{justify-content:flex-end}.v9-log{padding:9px 0;border-bottom:1px solid var(--line);font-size:12px}.v9-log span{color:var(--muted);margin-right:14px}@media(max-width:800px){.v9-two,.v9-scoreboard,.v9-pick{grid-template-columns:1fr}.v9-home-online,.v9-banner,.v9-phase,.v9-unit{flex-direction:column;align-items:flex-start}.v9-pick p{grid-column:1}.v9-unit .actions{justify-content:flex-start}}
+`;document.head.appendChild(v9Styles);
+const v9Tag=$('.brand small');if(v9Tag)v9Tag.textContent='ARMY BUILDER · SHARED MATCHES · v9';
+const v9Ver=$('.version-text');if(v9Ver)v9Ver.textContent='TABLETOP COMMAND · v9 · ONLINE ROOMS PREVIEW';
+if(v9.joinCode)ui.route='online';
+// ===== end v9 =====
 
 render();save();
 })();
