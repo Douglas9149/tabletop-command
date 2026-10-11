@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="dark">
   <meta name="theme-color" content="#101419">
-  <title>Tabletop Command v9 — Build Armies & Play Together</title>
+  <title>Tabletop Command v10 — Build, Learn & Play with Friends</title>
   <style>:root{--bg:#0c1015;--sidebar:#12171c;--panel:#171e25;--panel2:#1c252d;--field:#101820;--line:#2a343d;--line2:#35414a;--text:#f0eee8;--muted:#a2aeb7;--faint:#71818e;--gold:#cfaa66;--gold2:#eac88d;--wine:#713840;--blue:#81a9c3;--red:#e18b85;--green:#8fc8a9;--shadow:0 12px 36px #0005;--radius:12px}
 *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--bg);color:var(--text);font:14px/1.48 system-ui,-apple-system,'Segoe UI',sans-serif}button,input,select,textarea{font:inherit}button{cursor:pointer}button:disabled{opacity:.44;cursor:not-allowed}a{color:var(--gold2)}.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)}
 .app-shell{display:grid;grid-template-columns:238px minmax(0,1fr);min-height:100vh}.sidebar{position:sticky;top:0;height:100vh;background:var(--sidebar);border-right:1px solid var(--line);padding:24px 14px 16px;display:flex;flex-direction:column;z-index:5}.brand{display:flex;align-items:center;gap:11px;padding:4px 9px 29px}.brand-mark{width:38px;height:38px;display:grid;place-items:center;background:linear-gradient(135deg,#77533a,#bf9a5c);color:#17191b;font-size:26px;font-weight:900;clip-path:polygon(50% 0,96% 25%,96% 75%,50% 100%,4% 75%,4% 25%)}.brand strong{display:block;font-size:13px;letter-spacing:1.65px}.brand small{display:block;color:var(--faint);font-size:9px;letter-spacing:1.3px;margin-top:2px}.section-label{color:var(--faint);font-weight:750;font-size:10px;letter-spacing:1.5px;padding:0 14px;margin-bottom:12px}.section-gap{margin-top:23px}.main-nav{display:grid;gap:4px}.nav-link{border:0;background:transparent;color:#b7c0c7;text-align:left;padding:12px 14px;border-radius:9px;display:flex;align-items:center;gap:12px;font-weight:600;width:100%;transition:.15s}.nav-link:hover{background:#ffffff0b;color:#fff}.nav-link.active{background:linear-gradient(90deg,#a77f4433,#93734709);color:var(--gold2);border:1px solid #a77f4440}.nav-icon{display:inline-grid;place-items:center;font-size:19px;width:21px;line-height:1}.sidebar-bottom{margin-top:auto;color:var(--faint);font-size:11px;padding:0 8px}.sidebar-bottom p{line-height:1.5}.status-indicator{color:#b5bebc;font-size:11px}.live-dot{display:inline-block;background:var(--green);width:7px;height:7px;border-radius:100%;margin-right:7px;box-shadow:0 0 0 3px #8fc8a916}.version-text{border-top:1px solid var(--line);padding-top:14px;margin-top:16px;letter-spacing:1.2px;font-size:10px}.main-column{min-width:0;display:flex;flex-direction:column}.topbar{position:sticky;top:0;z-index:4;background:#10161be8;backdrop-filter:blur(14px);border-bottom:1px solid var(--line);height:73px;display:flex;align-items:center;gap:16px;padding:0 30px}.breadcrumbs{display:flex;align-items:center;gap:12px;white-space:nowrap;min-width:0}.breadcrumbs span:first-child{font-size:10px;letter-spacing:1.4px;color:var(--faint);font-weight:750}.breadcrumbs b{font-size:14px;font-weight:650;overflow:hidden;text-overflow:ellipsis}.crumb-divider{color:var(--faint)}.top-actions{margin-left:auto;display:flex;align-items:center;gap:18px}.force-switcher{width:210px;background:#1b242b;border:1px solid #35414a;border-radius:8px;padding:9px 12px;color:var(--text);font-weight:650}.autosave{font-size:10px;letter-spacing:.9px;color:var(--faint);white-space:nowrap}.content{width:100%;max-width:1540px;margin:0 auto;padding:36px 36px 64px;flex:1}.footer{margin-top:auto;border-top:1px solid var(--line);padding:16px 36px 22px;color:var(--faint);font-size:11px}.mobile-menu{display:none}
@@ -1660,7 +1660,7 @@ const V7_DET_EFFECT={
  'Stormlance Task Force':{text:'High mobility and rapid offensives. Most relevant to bikes, mounted troops and swift formations.',filter:u=>/outrider|bike|speeder|jump|storm/i.test(u.name),why:'Mobile candidate'},
 };
 // Save migration: preserve every existing army and campaign entry.
-if(!Array.isArray(data.players))data.players=[{id:'self',name:'You'},{id:'owen',name:'Owen'},{id:'jason',name:'Jason'}];
+if(!Array.isArray(data.players))data.players=[{id:'self',name:'You'}];
 if(!data.players.some(p=>p.id==='self'))data.players.unshift({id:'self',name:'You'});
 for(const a of data.savedArmies||[])if(!a.ownerId)a.ownerId='self';
 if(!data.v7Photos)data.v7Photos={};
@@ -2051,16 +2051,12 @@ const v9Config=()=>{
 };
 function v9Configured(){const c=v9Config();return /^https:\/\/[a-z0-9-]+\.supabase\.co\/?$/i.test(c.url)&&c.publishableKey.length>12;}
 function v9Error(err){v9.error=err?.message||String(err);v9.busy=false;render();toast('Online match: '+v9.error);}
+// Supabase client creation is separate from sign-in. A disabled anonymous provider must
+// not prevent a user from reaching the email login screen.
 async function v9LoadClient(){
- if(v9.client)return v9.client;
- if(!v9Configured())throw Error('Supabase is not configured yet. Site owner: add the public Project URL and publishable key to config.js.');
- if(!window.supabase?.createClient)await new Promise((resolve,reject)=>{
-  let script=document.createElement('script');script.src='https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js';script.onload=resolve;script.onerror=()=>reject(Error('Unable to load Supabase client; check your internet connection.'));document.head.appendChild(script);
- });
- const c=v9Config();v9.client=window.supabase.createClient(c.url,c.publishableKey,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:false}});
- let {data:{session},error}=await v9.client.auth.getSession();if(error)throw error;
- if(!session){const res=await v9.client.auth.signInAnonymously();if(res.error)throw res.error;session=res.data.session;}
- v9.session=session;v9.connected=true;return v9.client;
+ const client=await v10GetClient();
+ if(!v9.session)throw Error('Sign in on Player Profile first. Use email sign-in; anonymous access is optional.');
+ return client;
 }
 function v9RoomArmy(){const army=data.savedArmies?.find(a=>a.id===v9.armyId);return (army?.army||[]).slice(0,80).map(u=>{
  const models=Math.max(1,Math.min(60,Number(u.models)||1));
@@ -2138,6 +2134,298 @@ const v9Tag=$('.brand small');if(v9Tag)v9Tag.textContent='ARMY BUILDER · SHARED
 const v9Ver=$('.version-text');if(v9Ver)v9Ver.textContent='TABLETOP COMMAND · v9 · ONLINE ROOMS PREVIEW';
 if(v9.joinCode)ui.route='online';
 // ===== end v9 =====
+
+// ===== TABLETOP COMMAND v10: public-first UI, opt-in auth, editable reference profiles =====
+const V10_PROFILE_KEY='tc_display_name_v10';
+const v10={
+ displayName:localStorage.getItem(V10_PROFILE_KEY)||'',
+ email:'',otp:'',authMessage:'',busy:false,authChecked:false,
+ searchTab:'',notes:false,
+ context:{},lastCard:'',
+};
+if(!v9.playerName && v10.displayName)v9.playerName=v10.displayName;
+// Selected, independently summarized 11th-edition Space Marine factual profiles.
+// Availability and points can change; links retain the source/date for rechecking.
+const V10_CURATED = {
+ 'Infiltrator Squad':{
+  points:85,models:5,min:5,max:10,stats:['8"',4,'3+',2,'6+',1],
+  words:['INFANTRY','EXPLOSIVES','IMPERIUM','PHOBOS','SMOKE','ADEPTUS ASTARTES'],
+  weapons:[['Bolt pistol','12"',1,'3+',5,-1,1,'Close-quarters'],['Marksman bolt carbine','24"',2,'3+',5,-1,1,'Rapid Fire 1, Precision'],['Ceramite fists','Melee',3,'3+',5,0,1,'']],
+  abilities:[['Omni-scramblers','In your Shooting phase, choose one visible enemy unit within 18 inches. That enemy becomes detected and its detection range increases by 3 inches. This is a detection effect, not a Strength or damage bonus.'],['Helix Gauntlet (optional)','If a model has a Helix Gauntlet, heal D3 wounds on this unit in your Command phase. Roll one D3 to determine wounds restored.']],
+  loadout:'Five or ten Phobos-armoured troops, equipped with bolt pistols and marksman bolt carbines; one model can take a Helix Gauntlet.'
+ },
+ 'Gladiator Lancer':{
+  points:165,models:1,min:1,max:1,stats:['10"',10,'3+',12,'6+',3],
+  words:['VEHICLE','FRAME','IMPERIUM','SMOKE','ADEPTUS ASTARTES'],
+  weapons:[['Laser destroyer (heavy)','72"',2,'3+',14,-3,'D6+3','Heavy'],['Defensive array','24"',6,'3+',5,-1,1,'Rapid Fire 6'],['Multi-melta (optional)','18"',2,'3+',10,-3,'D3+2','Melta 3'],['Armoured hull','Melee',3,'4+',6,0,1,'']],
+  abilities:[['Aquilon Optics','While this vehicle makes ranged attacks against a MONSTER or VEHICLE target, it can re-roll one hit roll, one wound roll and one damage roll. This improves reliability; it does not directly change weapon Strength or AP.'],['Damaged 4','While the vehicle has 4 wounds or fewer remaining, subtract 1 from its Hit rolls.'],['Deadly Demise D3','Apply Deadly Demise D3 if the vehicle is destroyed, following the applicable core-rule conditions.']],
+  loadout:'One Gladiator Lancer with laser destroyer and defensive array. Optional multi-melta has an additional published upgrade cost; select and pay for the equipped option.'
+ },
+ 'Tactical Squad':{
+  points:140,models:10,min:10,max:10,stats:['6"',4,'3+',2,'6+',2],
+  words:['INFANTRY','BATTLELINE','GRENADES','IMPERIUM','TACTICAL SQUAD','ADEPTUS ASTARTES'],
+  weapons:[['Boltgun','24"',2,'3+',4,0,1,''],['Bolt pistol','12"',1,'3+',4,0,1,'Pistol'],['Lascannon (option)','48"',1,'4+',12,-3,'D6+1','Heavy'],['Heavy bolter (option)','36"',3,'4+',5,-1,2,'Heavy, Sustained Hits 1'],['Meltagun (option)','12"',1,'3+',9,-4,'D6','Melta 2'],['Plasma gun (option)','24"',1,'3+',7,-2,1,'Rapid Fire 1'],['Plasma gun (supercharge option)','24"',1,'3+',8,-3,2,'Hazardous, Rapid Fire 1'],['Flamer (option)','12"','D6','N/A',4,0,1,'Ignores Cover, Torrent'],['Missile launcher · krak (option)','48"',1,'4+',9,-2,'D6','Heavy'],['Missile launcher · frag (option)','48"','D6','4+',4,0,1,'Blast, Heavy'],['Chainsword (Sergeant option)','Melee',4,'3+',4,-1,1,''],['Power fist (Sergeant option)','Melee',2,'3+',8,-2,2,''],['Close-combat weapon','Melee',2,'3+',4,0,1,'']],
+  abilities:[['Combat Squads','At the Declare Battle Formations step, before any units deploy, this 10-model squad may split into two separate five-model units. The split does not purchase an extra squad.']],
+  loadout:'Ten Marines including Sergeant. The original boltgun loadout may be changed by legal special-weapon/heavy-weapon substitutions; Sergeant has listed pistol and melee alternatives. The table lists representative optional weapons, not weapons carried by every model.'
+ }
+};
+const V10_CURATED_META={
+ 'Infiltrator Squad':{costs:{5:85,10:150},url:'https://www.wahapedia.ru/wh40k11ed/factions/space-marines/Infiltrator-Squad'},
+ 'Gladiator Lancer':{costs:{1:165},url:'https://www.wahapedia.ru/wh40k11ed/factions/space-marines/Gladiator-Lancer-1',third:{1:185}},
+ 'Tactical Squad':{costs:{10:140},url:'https://www.wahapedia.ru/wh40k11ed/factions/space-marines/Tactical-Squad'}
+};
+for(const [name,profile] of Object.entries(V10_CURATED)){
+ V7_DETAILS[name]=profile;
+ const info=V10_CURATED_META[name];
+ V7_SOURCE[name]=info.url;
+ V7_SIZES[name]=info.costs;
+ V9_REVIEWED[name]={points:profile.points,costs:info.costs,url:info.url,asof:'2026-10-11',...(info.third?{third:info.third}:{})};
+}
+
+// User-editable, manually entered datasheets persist in the same local JSON backups.
+data.communityDatasheets=data.communityDatasheets&&typeof data.communityDatasheets==='object'?data.communityDatasheets:{};
+data.customPoints=data.customPoints&&typeof data.customPoints==='object'?data.customPoints:{};
+const v10ProfileKey=(fac,name)=>`${fac}|${name}`;
+function v10InstallProfile(key,profile){
+ if(!profile||!profile.name||!Array.isArray(profile.stats)||profile.stats.length!==6)return;
+ // Only apply unambiguous local edits to the requested unit. Do not manufacture point costs.
+ V7_DETAILS[profile.name]={...profile,words:profile.words||[],weapons:profile.weapons||[],abilities:profile.abilities||[]};
+ if(Number(profile.points)>0 && profile.faction)data.customPoints[`${profile.faction}|${profile.name}`]=Number(profile.points);
+ if(profile.source&&/^https:\/\//i.test(profile.source))V7_SOURCE[profile.name]=profile.source;
+}
+for(const [key,entry] of Object.entries(data.communityDatasheets))v10InstallProfile(key,entry);
+const v10Html=(val)=>String(val==null?'':val).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('\"','&quot;').replaceAll("'",'&#39;');
+const v10BaseUrl=()=>location.origin+location.pathname;
+function v10AuthName(){return v10.displayName||v9.session?.user?.user_metadata?.display_name||v9.playerName||'Player';}
+function v10Identity(){return v9.session?.user?.email||'Guest identity linked to this browser';}
+async function v10GetClient(){
+ if(v9.client){if(!v10.authChecked){const s=await v9.client.auth.getSession();if(s.error)throw s.error;v9.session=s.data.session;v10.authChecked=true;}return v9.client;}
+ if(!v9Configured())throw Error('Site owner has not configured the Supabase Project URL and publishable key in config.js.');
+ if(!window.supabase?.createClient)await new Promise((resolve,reject)=>{
+   const script=document.createElement('script');script.src='https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js';
+   script.onload=resolve;script.onerror=()=>reject(Error('Unable to load the Supabase login library. Check the connection or content blockers.'));document.head.appendChild(script);
+ });
+ const cfg=v9Config();
+ v9.client=window.supabase.createClient(cfg.url,cfg.publishableKey,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+ v9.client.auth.onAuthStateChange((_evt,session)=>{
+  const oldId=v9.session?.user?.id;
+  v9.session=session;v9.connected=!!session;
+  if(!v10.displayName&&session?.user?.user_metadata?.display_name){v10.displayName=session.user.user_metadata.display_name;v9.playerName=v10.displayName;}
+  if(oldId!==session?.user?.id && (ui.route==='profile'||ui.route==='online'))Promise.resolve().then(()=>render());
+ });
+ const s=await v9.client.auth.getSession();if(s.error)throw s.error;
+ v9.session=s.data.session;v9.connected=!!s.data.session;v10.authChecked=true;
+ if(!v10.displayName&&s.data.session?.user?.user_metadata?.display_name){v10.displayName=s.data.session.user.user_metadata.display_name;v9.playerName=v10.displayName;}
+ return v9.client;
+}
+async function v10CheckStatus(){if(!v9Configured())return;try{await v10GetClient();if(ui.route==='profile'||ui.route==='online')render();}catch(e){v10.authMessage=e.message;}}
+async function v10Act(action){v10.busy=true;v10.authMessage='';render();
+ try{
+  if(action==='name'){
+    const name=(v10.displayName||'').trim().slice(0,40);
+    if(!name)throw Error('Enter a display name first.');
+    localStorage.setItem(V10_PROFILE_KEY,name);v10.displayName=name;v9.playerName=name;
+    const self=data.players?.find(p=>p.id==='self');if(self){self.name=name;save();}
+    if(v9.session){const client=await v10GetClient();const r=await client.auth.updateUser({data:{display_name:name}});if(r.error)throw r.error;}
+    v10.authMessage='Display name saved. You can use it in online rooms.';
+  }
+  if(action==='email'){
+    const email=v10.email.trim();if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))throw Error('Enter a valid email address.');
+    const client=await v10GetClient();
+    if(v9.session?.user?.is_anonymous)throw Error('You are using a guest identity. Sign out first only if you accept that its previous rooms may become inaccessible.');
+    const r=await client.auth.signInWithOtp({email,options:{emailRedirectTo:v10BaseUrl(),shouldCreateUser:true}});
+    if(r.error)throw r.error;
+    localStorage.setItem('tc_pending_room_v10',v9.joinCode||'');
+    v10.authMessage='Check your email for a sign-in link. The link will return you to this website. Also check spam.';
+  }
+  if(action==='verify'){
+    const client=await v10GetClient();const email=v10.email.trim(),token=v10.otp.trim();
+    if(!email||!token)throw Error('Enter your email and the six-digit code, if your email supplied one.');
+    const r=await client.auth.verifyOtp({email,token,type:'email'});if(r.error)throw r.error;
+    v9.session=r.data.session;v10.authMessage='Signed in successfully.';
+  }
+  if(action==='guest'){
+    const client=await v10GetClient();if(v9.session)throw Error('You are already signed in.');
+    const r=await client.auth.signInAnonymously();
+    if(r.error)throw Error('Guest sign-in unavailable. In Supabase → Authentication → Settings, enable anonymous sign-ins, or use the email method below. Details: '+r.error.message);
+    v9.session=r.data.session;v10.authMessage='Signed in as a guest. Keep the same browser to return to this match.';
+  }
+  if(action==='signout'){
+    const client=await v10GetClient();if(v9.session?.user?.is_anonymous&&!confirm('This guest identity cannot be recovered after sign-out. You may lose access to its old rooms. Continue?')){v10.busy=false;render();return;}
+    const r=await client.auth.signOut();if(r.error)throw r.error;
+    if(v9.channel){v9.client.removeChannel(v9.channel);v9.channel=null;}v9.session=null;v9.room=null;
+    v10.authMessage='Signed out. Local armies are still saved in this browser.';
+  }
+ }catch(e){v10.authMessage='Error: '+(e.message||String(e));}
+ v10.busy=false;render();
+}
+function v10AuthPanel(compact=false){
+ const isSigned=!!v9.session,user=v9.session?.user,kind=user?.is_anonymous?'Guest account':'Email account';
+ return `<section class="v10-account card card-pad"><div class="v7-panel-head"><div><span class="eyebrow">${compact?'ACCOUNT REQUIRED FOR ONLINE GAMES':'PLAYER PROFILE'}</span><h2>${isSigned?'Signed in · '+v10Html(kind):'Sign in to share matches'}</h2></div><span class="v10-status ${isSigned?'ok':'idle'}">${isSigned?'Online identity active':'Local mode'}</span></div>
+ ${isSigned?`<p class="muted">${v10Html(v10Identity())}</p><p>Room invitation links can be opened on this device. An email account can be used on another device; a guest identity usually cannot.</p><button class="btn ghost small" data-v10-auth="signout" ${v10.busy?'disabled':''}>Sign out</button>`:
+ `<p class="muted">An account is <strong>not required to browse datasheets or build armies</strong>. To join a shared room, sign in with an email link. No password is needed.</p>
+ <div class="v10-auth-fields"><label>Email address<input class="field" type="email" autocomplete="email" placeholder="you@example.com" data-v10-field="email" value="${v10Html(v10.email)}"></label><button class="btn primary" data-v10-auth="email" ${v10.busy?'disabled':''}>Email me a sign-in link</button></div>
+ <details class="v10-extra"><summary>Received a one-time code instead?</summary><div class="v10-auth-fields"><label>Code<input class="field" autocomplete="one-time-code" inputmode="numeric" placeholder="Enter code" data-v10-field="otp" value="${v10Html(v10.otp)}"></label><button class="btn ghost" data-v10-auth="verify">Confirm email code</button></div></details>
+ <details class="v10-extra"><summary>Guest sign-in (optional)</summary><p>Guest mode works only if the site owner enables anonymous sign-ins under Supabase <b>Authentication → Settings</b>. It can be lost after clearing this browser's data.</p><button class="btn ghost" data-v10-auth="guest">Continue as temporary guest</button></details>`}
+ ${v10.authMessage?`<p class="v10-status-line">${v10Html(v10.authMessage)}</p>`:''}
+ </section>`;
+}
+function v10ProfilePage(){const configured=v9Configured();return `${heading('YOUR PLAYER PROFILE','Player profile & sign-in','Play locally without an account, or sign in with email to join friends online.')}<div class="v10-profile-grid"><section class="card card-pad"><span class="eyebrow">VISIBLE TO FRIENDS</span><h2>Display name</h2><p class="muted">This identifies you in online rooms. It does not rename armies belonging to other local profiles.</p><label>Your name<input class="field" maxlength="40" data-v10-field="name" placeholder="e.g. Jason" value="${v10Html(v10.displayName)}"></label><button class="btn primary" data-v10-auth="name" ${v10.busy?'disabled':''}>Save display name</button></section>${configured?v10AuthPanel():`<section class="card card-pad"><h2>Online connection is not configured</h2><p>The site administrator must add the public Supabase project URL and publishable key to <code>config.js</code>.</p><p>Army building and local matches still work.</p></section>`}</div><section class="card card-pad"><h3>About data on this site</h3><p>Your saved army builder and personal datasheet edits stay in this browser and can be exported as a JSON backup. Signing in does not automatically upload or synchronize those local armies. Online rooms synchronize only the army roster that each player chooses for that room.</p><div class="actions"><button class="btn ghost" data-v7-jump="armies">My saved armies</button><button class="btn ghost" data-v7-jump="online">Online rooms</button><button class="btn ghost" data-v7-jump="settings">Backup local data</button></div></section>`;}
+// Show the new auth UI in online rooms. Do not silently create anonymous accounts.
+const V10_ONLINE_OLD=v9OnlinePage;
+v9OnlinePage=function(){const html=V10_ONLINE_OLD();if(v9.room)return html;
+ const panel=!v9.session?`${v10AuthPanel(true)}<p class="v7-warning">Sign in above to create or join an online room. Email sign-in works without Supabase anonymous access.</p>`:
+ `<div class="v10-signed-in"><span class="v10-status ok">Signed in</span> ${v10Html(v10Identity())} <button class="btn ghost small" data-v10-go="profile">Edit profile</button></div>`;
+ return html.replace('<div class="v9-intro">',panel+'<div class="v9-intro">');
+};
+const v10OldRoom=v9RoomView;
+v9RoomView=function(){const h=v10OldRoom();return h.replace('LIVE SHARED BATTLE','SHARED TABLETOP GAME');};
+// Promote public onboarding; preserve the old archival data in backups, not navigation.
+$$('[data-route="campaign"], [data-route="roster"], [data-route="director"], [data-route="battle"], [data-route="pregame"]').forEach(n=>n.remove());
+$$('.section-label').forEach(n=>{if(n.textContent.trim()==='NARRATIVE CAMPAIGNS')n.remove();});
+const v10ProfileNav=document.createElement('button');v10ProfileNav.className='nav-link';v10ProfileNav.dataset.route='profile';v10ProfileNav.innerHTML='<span class="nav-icon">◉</span> Player profile & sign-in';
+const v10OnlineNav=$('[data-route="online"]');
+if(v10OnlineNav)v10OnlineNav.insertAdjacentElement('beforebegin',v10ProfileNav);
+const oldHome=v7Home;
+v7Home=function(){let html=oldHome();return html.replace('The optional Crusade campaign is still preserved separately.','Your past local records remain in backups; the public app focuses on normal games.').replace('The optional Crusade campaign is still preserved separately.','No campaign setup required.').replace('The optional Crusade campaign','The original sample campaign').replace('the Gilded Resolutes campaign','your tabletop games');};
+const oldWalk=renderWalkthrough;
+renderWalkthrough=function(){let h=oldWalk();return h.replace(/Return to live campaign/g,'Open game tracker').replace(/campaign after-action example/gi,'match after-action example').replace(/live campaign/gi,'live tabletop game').replace(/campaign changes/gi,'changes to your saved games');};
+const oldGuide=renderGuide;
+renderGuide=function(){let h=oldGuide();return h.replace(/Play our campaign/g,'Set up a game').replace(/campaign changes/gi,'saved-game changes');};
+// Re-route archival links from older HTML versions.
+const V10_OLD_NAV=nav;
+nav=function(route){if(['campaign','roster','director','battle','pregame'].includes(route))route='overview';V10_OLD_NAV(route);};
+const V10_OLD_RENDER=render;
+render=function(){
+ if(['campaign','roster','director','battle','pregame'].includes(ui.route))ui.route='overview';
+ if(ui.route==='profile'){
+  $$('.nav-link').forEach(b=>b.classList.toggle('active',b.dataset.route==='profile'));
+  $('#breadcrumb').textContent='Player profile';$('#forceSwitcher').style.display='none';
+  $('#appContent').innerHTML=v10ProfilePage();return;
+ }
+ V10_OLD_RENDER();
+ $('#forceSwitcher').style.display='none';
+};
+// For *all* detailed unit cards, teach with conditional numerical changes when verified.
+const v10Contexts={
+ 'Aggressor Squad':{label:'Enemy within 9 inches',description:'+1 Strength to all attacks targeting an enemy unit within 9 inches. No CP required.',weapon:'all',changes:{S:1}},
+ 'Intercessor Squad':{label:'Squad or target within range of an objective',description:'Bolter Discipline grants +1 to ranged Hit rolls in the Shooting phase. A base 3+ hit succeeds on 2+, unless other modifiers apply.',weapon:'ranged',changes:{Hit:1}},
+ 'Assault Intercessor Squad':{label:'This squad successfully charged this turn',description:'Targeted Intercession grants +1 Strength and improves AP by 1 on melee attacks until the end of the turn.',weapon:'melee',changes:{S:1,AP:1}}
+};
+function v10Numeric(v){const n=Number(String(v).replace(/[+]/g,''));return Number.isFinite(n)?n:null;}
+function v10ImpactTable(name){const ctx=v10Contexts[name];if(!ctx||!V7_DETAILS[name])return '';
+ const active=!!v10.context[name],p=V7_DETAILS[name],rows=p.weapons||[];
+ return `<section class="v10-impact"><div class="v7-panel-head"><div><span class="eyebrow">PLAYABLE ABILITY EXAMPLE</span><h3>How the rule changes weapon stats</h3></div><label class="v10-toggle"><input type="checkbox" data-v10-context="${v10Html(name)}" ${active?'checked':''}> ${v10Html(ctx.label)}</label></div><p>${v10Html(ctx.description)}</p><div class="table-wrap"><table class="table"><thead><tr><th>Weapon</th><th>Base Hit</th><th>${active?'Modified':'Base'} Strength</th><th>${active?'Modified':'Base'} AP</th></tr></thead><tbody>${rows.map(w=>{let arr=Array.isArray(w)?w:[w.name,w.range,w.attacks,w.skill,w.strength,w.ap,w.damage];let isMelee=String(arr[1]).toLowerCase()==='melee',app=ctx.weapon==='all'||(ctx.weapon==='melee'&&isMelee)||(ctx.weapon==='ranged'&&!isMelee);let hit=String(arr[3]),strength=String(arr[4]),ap=String(arr[5]);if(active&&app){if(ctx.changes.S&&v10Numeric(strength)!==null)strength=String(v10Numeric(strength)+ctx.changes.S);if(ctx.changes.AP&&v10Numeric(ap)!==null)ap=String(v10Numeric(ap)-ctx.changes.AP);if(ctx.changes.Hit){const n=parseInt(hit);if(Number.isFinite(n))hit=Math.max(2,n-ctx.changes.Hit)+'+';}}return `<tr><td>${v10Html(arr[0])}</td><td>${v10Html(hit)}${active&&app&&ctx.changes.Hit?' ✓':''}</td><td>${v10Html(strength)}${active&&app&&ctx.changes.S?' ✓':''}</td><td>${v10Html(ap)}${active&&app&&ctx.changes.AP?' ✓':''}</td></tr>`;}).join('')}</tbody></table></div><p class="tiny muted">Check your chosen wargear and other modifiers. This is a teaching calculator for the listed rule, not a complete battle simulator.</p></section>`;
+}
+const V10_OLD_PROFILE=v7Profile;
+v7Profile=function(u){let html=V10_OLD_PROFILE(u),rich=u.v7Rich||V7_DETAILS[u.name],key=v10ProfileKey(v7Faction(u),u.name),custom=!!data.communityDatasheets[key];
+ const edit=`<button type="button" class="btn ghost small" data-v10-edit="${v10Html(u.id)}">${custom?'Edit personal datasheet':'Fill / edit datasheet'}</button>`;
+ html=html.replace('Set miniature photo</button>','Set miniature photo</button>'+edit);
+ if(custom)html=html.replace('Detailed local reference. Confirm current rule version and equipped options before playing.','Personal datasheet edits. Verify accuracy before playing.');
+ if(v10Contexts[u.name]&&!custom){
+   html=html.replace(/<section class="v81-bonus-panel">[\s\S]*?<\/section>/,'');
+   html=html.replace('<h3>Weapons & profiles</h3>',v10ImpactTable(u.name)+'<h3>Weapons & profiles</h3>');
+ }
+ const noRule=!rich||!(rich.weapons||[]).length||!(rich.abilities||[]).length;
+ if(noRule)html=html.replace('<h3>Weapons & profiles</h3>',`<div class="v7-warning"><b>Incomplete mechanical datasheet.</b> This card cannot be treated as a full Warhammer rules source yet. Open the linked reference or use <b>Fill / edit datasheet</b> to enter mechanics you have verified.</div><h3>Weapons & profiles</h3>`);
+ if(custom)html=html.replace('<h3>Keywords</h3>','<p class="v10-custom-tag">Community-entered profile · not independently verified by the website</p><h3>Keywords</h3>');
+ return html;
+};
+function v10EditDatasheet(id){const u=v7Find(id);if(!u)return;const key=v10ProfileKey(v7Faction(u),u.name),p=data.communityDatasheets[key]||u.v7Rich||V7_DETAILS[u.name]||{};
+ const stats=Array.isArray(p.stats)?p.stats:[u.stats?.move||'',u.stats?.toughness||'',u.stats?.save||'',u.stats?.wounds||'',u.stats?.leadership||'',u.stats?.oc||''];
+ const weapons=(p.weapons||[]).map(w=>{let t=Array.isArray(w)?w:[w.name,w.range,w.attacks,w.skill,w.strength,w.ap,w.damage,w.rules];return t.map(x=>String(x??'')).join(' | ');}).join('\n');
+ const abilities=(p.abilities||[]).map(a=>(Array.isArray(a)?a:[a.name,a.description]).map(x=>String(x||'')).join(' | ')).join('\n');
+ const text=(name,value,rows=3,help='')=>`<label class="form-field">${name}<textarea class="field" rows="${rows}" name="${value.id}" placeholder="${v10Html(help)}">${v10Html(value.val)}</textarea></label>`;
+ openModal('Complete datasheet — '+u.name,`<div class="v7-learning">Enter only rules you have verified from an up-to-date reference. Your changes are local to this browser until exported or shared. You own responsibility for copyrighted content you enter and share.</div><div class="form-grid">
+ <label class="form-field">Points (minimum squad size)<input class="field" type="number" min="0" max="5000" name="points" value="${v10Html(p.points||u.points||'')}"></label>
+ <label class="form-field">Models<input class="field" type="number" min="1" max="60" name="models" value="${v10Html(p.models||u.models||1)}"></label>
+ ${['Move','Toughness','Save','Wounds','Leadership','Objective Control'].map((x,i)=>`<label class="form-field">${x}<input class="field" name="stat${i}" value="${v10Html(stats[i]||'')}"></label>`).join('')}
+ ${text('Weapons — one per line (Name | Range | Attacks | Hit | Strength | AP | Damage | Rules)',{id:'weapons',val:weapons},6,'Bolt rifle | 24" | 2 | 3+ | 5 | -1 | 1 | Rapid Fire 1')}
+ ${text('Abilities — one per line (Name | exact trigger, numerical effect, duration and limits)',{id:'abilities',val:abilities},6,'Ability Name | When charged, +1 Strength until end of turn')}
+ ${text('Keywords — comma-separated',{id:'words',val:(p.words||u.keywords||[]).join(', ')},2,'INFANTRY, IMPERIUM')}
+ ${text('Equipment options (your own concise notes)',{id:'loadout',val:p.loadout||''},3)}
+ <label class="form-field">Source URL (optional, https only)<input class="field" name="source" value="${v10Html(p.source||'')}"></label></div>`,form=>{
+ const fd=new FormData(form),name=u.name,faction=v7Faction(u),parsedStats=Array.from({length:6},(_,i)=>String(fd.get('stat'+i)||'').trim()||'—');
+ const parsedWeapons=String(fd.get('weapons')||'').split(/\r?\n/).filter(x=>x.trim()).slice(0,35).map(line=>{let parts=line.split('|').map(x=>x.trim());while(parts.length<8)parts.push('');return parts.slice(0,8);});
+ const parsedAbilities=String(fd.get('abilities')||'').split(/\r?\n/).filter(x=>x.trim()).slice(0,35).map(line=>{let ix=line.indexOf('|');return ix<0?[line.trim(),'Needs a mechanical explanation.']:[line.slice(0,ix).trim(),line.slice(ix+1).trim()];});
+ const source=String(fd.get('source')||'').trim();if(source&&!/^https:\/\/[^\s]+$/i.test(source))return toast('Source must be an https URL.');
+ const points=Number(fd.get('points'))||0,models=Math.max(1,Math.min(60,Number(fd.get('models'))||1));
+ const entry={name,faction,points,models,stats:parsedStats,weapons:parsedWeapons,abilities:parsedAbilities,words:String(fd.get('words')||'').split(',').map(x=>x.trim()).filter(Boolean),loadout:String(fd.get('loadout')||''),source,personal:true,reviewedAt:new Date().toISOString().slice(0,10)};
+ data.communityDatasheets[key]=entry;v10InstallProfile(key,entry);if(source)V7_SOURCE[name]=source;
+ save();closeModal();render();toast('Personal datasheet saved. Export a JSON backup to share it.');
+ },{submitText:'Save local datasheet'});
+}
+// Optional private cloud backups. Profile accounts are still useful without this table.
+async function v10Cloud(action){
+ v10.busy=true;v10.authMessage='';render();
+ try{
+  const client=await v9LoadClient(),userId=v9.session.user.id;
+  if(action==='upload'){
+   const armies=(data.savedArmies||[]).filter(x=>(x.ownerId||'self')==='self').slice(0,200);
+   if(!armies.length){v10.authMessage='No armies in your own local profile yet. Create one in My saved armies first.';}
+   else{
+    const rows=armies.map(a=>({user_id:userId,army_id:String(a.id).slice(0,100),payload:a,updated_at:new Date().toISOString()}));
+    const result=await client.from('tc_armies').upsert(rows,{onConflict:'user_id,army_id'});
+    if(result.error)throw result.error;
+    v10.authMessage=`Uploaded ${armies.length} armies from your local player profile. Existing local armies were not changed.`;
+   }
+  }
+  if(action==='download'){
+   const result=await client.from('tc_armies').select('army_id,payload,updated_at').order('updated_at',{ascending:false}).limit(200);
+   if(result.error)throw result.error;
+   let added=0,copied=0,unchanged=0;
+   for(const item of result.data||[]){const src=item.payload;if(!src||!src.id||!Array.isArray(src.army))continue;
+    const local=data.savedArmies.find(x=>x.id===src.id);
+    if(!local){data.savedArmies.push({...src,ownerId:'self'});added++;}
+    else if(JSON.stringify({...local,ownerId:'self'})!==JSON.stringify({...src,ownerId:'self'})){
+      data.savedArmies.push({...src,id:uid('cloudarmy'),name:(src.name||'Army')+' (cloud copy)',ownerId:'self'});copied++;
+    }else unchanged++;
+   }
+   save();
+   v10.authMessage=`Downloaded cloud armies: ${added} new, ${copied} alternate copies, ${unchanged} already identical. Existing local lists were never overwritten.`;
+  }
+ }catch(e){
+  v10.authMessage='Cloud sync unavailable: '+(e.message||String(e))+' — the website owner may still need to run the v10 Supabase migration SQL.';
+ }
+ v10.busy=false;render();
+}
+// Profile page: cloud actions opt-in; no automatic upload of anyone's private local army data.
+const V10_OLD_PROFILE_PAGE=v10ProfilePage;
+v10ProfilePage=function(){const html=V10_OLD_PROFILE_PAGE();const panel=`<section class="card card-pad v10-cloud"><div class="v7-panel-head"><div><span class="eyebrow">OPTIONAL CLOUD BACKUP</span><h2>My armies on other devices</h2></div><span class="v10-status">Private</span></div><p>After signing in with the same email on another device, upload your armies here and import them there. Only armies owned by your local <b>Your player</b> profile are uploaded. You must first run <code>supabase_v10_profiles.sql</code> in your Supabase SQL Editor. The website will not automatically replace an existing local army.</p><div class="actions"><button class="btn primary" data-v10-cloud="upload" ${!v9.session||v10.busy?'disabled':''}>Upload my armies</button><button class="btn ghost" data-v10-cloud="download" ${!v9.session||v10.busy?'disabled':''}>Download my cloud armies</button></div></section>`;
+ return html+panel;
+};
+window.addEventListener('click',e=>{const b=e.target.closest('[data-v10-cloud]');if(!b)return;e.preventDefault();e.stopImmediatePropagation();v10Cloud(b.dataset.v10Cloud);},true);
+
+// Actions and events. Input events keep typed data alive when the UI re-renders.
+document.addEventListener('input',e=>{if(!e.target?.dataset?.v10Field)return;const f=e.target.dataset.v10Field;if(f==='name')v10.displayName=e.target.value;if(f==='email')v10.email=e.target.value;if(f==='otp')v10.otp=e.target.value;},true);
+document.addEventListener('change',e=>{const name=e.target?.dataset?.v10Context;if(name){v10.context[name]=e.target.checked;render();}},true);
+window.addEventListener('click',e=>{
+ const edit=e.target.closest('[data-v10-edit]');if(edit){e.stopImmediatePropagation();e.preventDefault();return v10EditDatasheet(edit.dataset.v10Edit);}
+ const auth=e.target.closest('[data-v10-auth]');if(auth){e.stopImmediatePropagation();e.preventDefault();return v10Act(auth.dataset.v10Auth);}
+ const go=e.target.closest('[data-v10-go]');if(go){e.stopImmediatePropagation();e.preventDefault();return nav(go.dataset.v10Go);}
+},true);
+const v10Css=document.createElement('style');v10Css.textContent=`
+ .sidebar .section-label:empty{display:none}.force-switcher{display:none!important}
+ .v10-profile-grid{display:grid;grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr);gap:15px;margin:15px 0}
+ .v10-profile-grid .card,.v10-account{min-width:0}.v10-profile-grid input{width:100%;max-width:440px;margin:10px 0}
+ .v10-auth-fields{display:flex;align-items:end;flex-wrap:wrap;gap:12px;margin:16px 0}.v10-auth-fields label{display:grid;gap:5px;flex:1;min-width:190px}
+ .v10-status{border-radius:24px;padding:5px 10px;color:#bed9e2;background:#273e4a;font-size:11px}.v10-status.ok{color:#a8e7bb;background:#1f5135}
+ .v10-status-line{padding:12px;border:1px solid #4a6578;background:#1f303c;border-radius:8px;font-size:12px;line-height:1.6}
+ .v10-extra{border-top:1px solid #405565;margin-top:16px;padding:12px 0}.v10-extra summary{cursor:pointer;color:#dce9f0;font-weight:bold}.v10-extra p{font-size:12px;color:#adc2cb}
+ .v10-impact{margin:18px 0;border:1px solid #50758a;background:#1c3645;border-radius:10px;padding:17px}
+ .v10-impact h3{margin:4px 0}.v10-impact p{color:#c4d8e4;font-size:12px;line-height:1.6}.v10-impact td strong{color:#f0dda0}
+ .v10-toggle{display:flex;align-items:center;gap:8px;border:1px solid #658ea0;padding:10px;border-radius:8px;font-size:12px;cursor:pointer;background:#203e50}.v10-toggle input{accent-color:#90c9e4}
+ .v10-custom-tag{border-left:3px solid #dcb570;padding:10px 12px;background:#50432d33;font-size:12px;color:#eed5b2}
+ .v10-signed-in{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:12px 14px;border:1px solid #416c75;border-radius:8px;margin:13px 0}
+ @media(max-width:850px){.v10-profile-grid{grid-template-columns:1fr}} @media(max-width:570px){.v10-auth-fields{display:grid}.v10-toggle{width:100%}.v10-impact .v7-panel-head{align-items:stretch}}
+`;document.head.appendChild(v10Css);
+const v10Brand=$('.brand small');if(v10Brand)v10Brand.textContent='BUILD · LEARN · PLAY · v10';
+const v10Version=$('.version-text');if(v10Version)v10Version.textContent='TABLETOP COMMAND · v10 · PUBLIC BETA';
+const v10Footer=$('.footer');if(v10Footer)v10Footer.textContent='Independent community tabletop companion, not affiliated with Games Workshop. Mechanical summaries are not an official rules database. Verify tournament rules and points with current sources.';
+const pending=localStorage.getItem('tc_pending_room_v10');if(!v9.joinCode&&pending){v9.joinCode=pending;localStorage.removeItem('tc_pending_room_v10');}
+// Do not require login to render offline pages. Resolve a returning email-link session lazily.
+Promise.resolve().then(()=>v10CheckStatus());
+// ===== end v10 =====
 
 render();save();
 })();
