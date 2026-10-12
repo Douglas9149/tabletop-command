@@ -2883,9 +2883,240 @@ document.addEventListener('change',e=>{if(e.target?.dataset?.tc112Matchname){ttD
 const tc112Nav=$('.sidebar [data-route="armies"]');if(tc112Nav)tc112Nav.textContent='▥ My armies';
 const tc112Meta=document.querySelector('meta[name="description"]');if(tc112Meta)tc112Meta.content='Build Warhammer armies, share lists with friends and track matches. Fan-made tabletop companion.';
 const tc112Brand=$('.brand small');if(tc112Brand)tc112Brand.textContent='ARMY BUILDER & MATCH COMPANION · v11.2';
-const tc112Version=$('.version-text');if(tc112Version)tc112Version.textContent='TABLETOP COMMAND · v11.2 · PERSONAL & SHARED ARMIES';
+const tc112Version=$('.version-text');if(tc112Version)tc112Version.textContent='TABLETOP COMMAND · v12 · PERSONAL & SHARED ARMIES';
 // Persist non-destructive legacy save migration; imported lists are only local until explicitly shared.
 save();render();
+
+
+// TABLETOP COMMAND v12 — optional, local community-data enrichment
+// Player-initiated client-side reading of BSData source JSON. No source datasheet
+// text is bundled into this published website; raw files are read by the visitor.
+const tc12={sources:new Map(),loading:false,message:'',lastError:'',total:0};
+const TC12_REPOSITORY='https://github.com/BSData/wh40k-11e';
+const TC12_RAW='https://raw.githubusercontent.com/BSData/wh40k-11e/main/';
+const TC12_FILES={
+ 'Space Marines':['Imperium - Space Marines.json'],
+ 'Ultramarines':['Imperium - Space Marines.json','Imperium - Ultramarines.json'],
+ 'Blood Angels':['Imperium - Space Marines.json','Imperium - Blood Angels.json'],
+ 'Dark Angels':['Imperium - Space Marines.json','Imperium - Dark Angels.json'],
+ 'Black Templars':['Imperium - Space Marines.json','Imperium - Black Templars.json'],
+ 'Space Wolves':['Imperium - Space Marines.json','Imperium - Space Wolves.json'],
+ 'Imperial Fists':['Imperium - Space Marines.json','Imperium - Imperial Fists.json'],
+ 'White Scars':['Imperium - Space Marines.json','Imperium - White Scars.json'],
+ 'Raven Guard':['Imperium - Space Marines.json','Imperium - Raven Guard.json'],
+ 'Iron Hands':['Imperium - Space Marines.json','Imperium - Iron Hands.json'],
+ 'Salamanders':['Imperium - Space Marines.json','Imperium - Salamanders.json'],
+ 'Deathwatch':['Imperium - Space Marines.json','Imperium - Deathwatch.json'],
+ 'Grey Knights':['Imperium - Grey Knights.json'],
+ 'Astra Militarum':['Imperium - Astra Militarum - Library.json','Imperium - Astra Militarum.json'],
+ 'Imperial Knights':['Imperium - Imperial Knights - Library.json','Imperium - Imperial Knights.json'],
+ 'Agents of the Imperium':['Imperium - Agents of the Imperium.json'],
+ 'Orks':['Orks.json'],
+ 'Necrons':['Necrons.json'],
+ 'Tyranids':['Library - Tyranids.json','Tyranids.json'],
+ 'T’au Empire':["T'au Empire.json"],
+ "T'au Empire":["T'au Empire.json"],
+ 'Aeldari':['Aeldari - Aeldari Library.json','Aeldari - Craftworlds.json'],
+ 'Drukhari':['Aeldari - Aeldari Library.json','Aeldari - Drukhari.json'],
+ 'Chaos Space Marines':['Chaos - Chaos Space Marines.json'],
+ 'Chaos Daemons':['Chaos - Chaos Daemons Library.json','Chaos - Chaos Daemons.json'],
+ 'Chaos Knights':['Chaos - Chaos Knights Library.json','Chaos - Chaos Knights.json'],
+ 'Death Guard':['Chaos - Death Guard.json'],
+ 'Thousand Sons':['Chaos - Thousand Sons.json'],
+ 'World Eaters':['Chaos - World Eaters.json'],
+ "Emperor's Children":["Chaos - Emperor's Children.json"],
+ 'Leagues of Votann':['Leagues of Votann.json'],
+ 'Genestealer Cults':['Genestealer Cults.json'],
+ 'Adepta Sororitas':['Imperium - Adepta Sororitas.json'],
+ 'Adeptus Mechanicus':['Imperium - Adeptus Mechanicus.json'],
+ 'Adeptus Custodes':['Imperium - Adeptus Custodes.json']
+};
+// Derive unit ownership from the source catalogue name, not from a player account.
+function tc12FactionFor(cat,provided=''){
+ const n=String(cat?.name||'').toLowerCase();
+ const map=[['ultramarines','Ultramarines'],['blood angels','Blood Angels'],['dark angels','Dark Angels'],['black templars','Black Templars'],['space wolves','Space Wolves'],['deathwatch','Deathwatch'],['iron hands','Iron Hands'],['white scars','White Scars'],['imperial fists','Imperial Fists'],['raven guard','Raven Guard'],['salamanders','Salamanders'],['grey knights','Grey Knights'],['space marines','Space Marines'],['astra militarum','Astra Militarum'],['agents of the imperium','Agents of the Imperium'],['imperial knights','Imperial Knights'],['orks','Orks'],['necrons','Necrons'],['tyranids','Tyranids'],['genestealer cults','Genestealer Cults'],["t'au",'T’au Empire'],['aeldari','Aeldari'],['craftworlds','Aeldari'],['drukhari','Drukhari'],['chaos space marines','Chaos Space Marines'],['chaos daemons','Chaos Daemons'],['chaos knights','Chaos Knights'],['death guard','Death Guard'],['thousand sons','Thousand Sons'],['world eaters','World Eaters'],["emperor's children","Emperor's Children"],['leagues of votann','Leagues of Votann'],['adepta sororitas','Adepta Sororitas'],['adeptus mechanicus','Adeptus Mechanicus'],['adeptus custodes','Adeptus Custodes']];
+ for(const [needle,fac] of map)if(n.includes(needle))return fac;
+ return provided==='All factions'?'Other':provided||'Other';
+}
+function tc12ReadCharacteristic(profile,names){
+ const arr=Array.isArray(profile?.characteristics)?profile.characteristics:[];
+ for(const name of names){const found=arr.find(x=>String(x.name||'').toLowerCase()===name.toLowerCase());if(found)return String(found.$text??found.value??'—').trim()||'—';}
+ return '—';
+}
+function tc12ExtractUnitData(rawDocs,requestedFaction){
+ const sources=rawDocs.map(d=>({cat:d.json?.catalogue||d.json?.gameSystem||d.json||{},file:d.file}));
+ const byId=new Map();
+ function index(value,depth=0){
+  if(!value||depth>22)return;
+  if(Array.isArray(value)){value.forEach(x=>index(x,depth+1));return;}
+  if(typeof value!=='object')return;
+  if(value.id && !byId.has(value.id))byId.set(value.id,value);
+  for(const k of ['sharedSelectionEntries','selectionEntries','sharedSelectionEntryGroups','selectionEntryGroups','sharedProfiles','profiles','sharedRules','rules']){
+   if(value[k])index(value[k],depth+1);
+  }
+ }
+ sources.forEach(x=>index(x.cat));
+ const seenKeys=new Set();const output=[];
+ for(const src of sources){
+  const cat=src.cat;const faction=tc12FactionFor(cat,requestedFaction);
+  if(/library/i.test(cat.name||'') && !Array.isArray(cat.entryLinks))continue;
+  const candidates=[...(cat.sharedSelectionEntries||[]),...(cat.selectionEntries||[])];
+  for(const link of cat.entryLinks||[])if(link.type==='selectionEntry'&&link.targetId&&byId.has(link.targetId))candidates.push(byId.get(link.targetId));
+  for(const root of candidates){
+   if(!root||root.type!=='unit'||root.hidden===true)continue;
+   let name=String(root.name||'').trim();if(!name||name.length>110)continue;
+   const key=faction+'|'+name.toLowerCase();if(seenKeys.has(key))continue;seenKeys.add(key);
+   const profiles=[];const categories=new Set();const visited=new Set();const equipment=new Set();let minModels=0;let maxModels=0;
+   function walk(node,depth=0){
+    if(!node||typeof node!=='object'||depth>10||visited.size>480)return;
+    if(node.id){if(visited.has(node.id))return;visited.add(node.id);}
+    if(Array.isArray(node.profiles))profiles.push(...node.profiles);
+    if(Array.isArray(node.categoryLinks))for(const tag of node.categoryLinks){const label=String(tag.name||'').trim();if(label && label.length<65)categories.add(label);}
+    if(node.type==='model'){
+     const bounds=node.constraints||[];const low=bounds.find(c=>c.type==='min'&&c.field==='selections'&&c.scope==='parent');
+     const high=bounds.find(c=>c.type==='max'&&c.field==='selections'&&c.scope==='parent');
+     if(low){minModels+=Math.max(0,Number(low.value)||0);}if(high){maxModels+=Math.max(0,Number(high.value)||0);}
+    }
+    if(node.type==='upgrade'&&node.name && equipment.size<110)equipment.add(String(node.name).slice(0,100));
+    for(const k of ['selectionEntries','selectionEntryGroups'])for(const sub of node[k]||[])walk(sub,depth+1);
+    for(const k of ['entryLinks','infoLinks'])for(const link of node[k]||[]){
+     if(link.targetId && byId.has(link.targetId))walk(byId.get(link.targetId),depth+1);
+    }
+   }
+   walk(root);
+   const unitProf=profiles.find(p=>/^(Unit|Model)$/i.test(p.typeName||'')&&tc12ReadCharacteristic(p,['T'])!=='—');
+   const stats=unitProf?['M','T','Sv','W','LD','OC'].map(k=>tc12ReadCharacteristic(unitProf,[k])):null;
+   const weaponRows=[];const weaponsSeen=new Set();
+   for(const p of profiles){
+    if(!/(Ranged Weapons|Melee Weapons)/i.test(p.typeName||''))continue;
+    const row=[String(p.name||'Weapon'),tc12ReadCharacteristic(p,['Range','Rng']),tc12ReadCharacteristic(p,['A','Attacks']),tc12ReadCharacteristic(p,['BS','WS','Hit']),tc12ReadCharacteristic(p,['S','Strength']),tc12ReadCharacteristic(p,['AP']),tc12ReadCharacteristic(p,['D','Damage']),tc12ReadCharacteristic(p,['Keywords'])];
+    const wkey=row.join('|').toLowerCase();if(weaponsSeen.has(wkey))continue;weaponsSeen.add(wkey);
+    if(weaponRows.length<90)weaponRows.push(row.map(x=>String(x).slice(0,140)));
+   }
+   const abilities=[];const abilitySeen=new Set();
+   for(const p of profiles){
+    if(!/^(Abilities|Ability)$/i.test(p.typeName||''))continue;
+    const label=String(p.name||'Ability').trim();const desc=tc12ReadCharacteristic(p,['Description','Effect']);
+    if(abilitySeen.has(label.toLowerCase())||desc==='—')continue;abilitySeen.add(label.toLowerCase());
+    if(abilities.length<28)abilities.push([label.slice(0,90),String(desc).slice(0,4500)]);
+   }
+   const cost=(root.costs||[]).find(c=>String(c.name||'').toLowerCase()==='pts');
+   const points=Number(cost?.value)>0?Number(cost.value):null;
+   const count=minModels>0?minModels:(maxModels>0?Math.min(maxModels,10):null);
+   const tags=new Set([...categories].map(x=>x.toLowerCase()));
+   const category=tags.has('epic hero')||tags.has('character')?'Character':tags.has('battleline')?'Battleline':tags.has('vehicle')?'Vehicle':tags.has('monster')?'Monster':tags.has('dedicated transport')?'Transport':tags.has('infantry')?'Infantry':tags.has('walker')?'Walker':'Other';
+   if(!stats&&!weaponRows.length&&!abilities.length&&points===null)continue;
+   const inv=unitProf?tc12ReadCharacteristic(unitProf,['InSv','Invulnerable Save']):'—';
+   const e={name,faction,category,points,models:count||1,min:count||undefined,max:maxModels>0?maxModels:undefined,stats:stats||['—','—','—','—','—','—'],inv:inv==='—'?undefined:inv,words:[...categories].slice(0,32),weapons:weaponRows,abilities,loadout:equipment.size?'Possible weapons and wargear: '+[...equipment].slice(0,35).join(', ')+'. Verify legal combinations and model allocation with the current source.':'Equipment alternatives are not fully represented by this import. Check the latest unit rules.',file:src.file,revision:Number(cat.revision)||null,importedAt:new Date().toISOString().slice(0,10),sourceUrl:TC12_REPOSITORY+'/blob/main/'+encodeURIComponent(src.file),status:stats&&weaponRows.length?'community detailed':'community partial'};
+   output.push(e);
+  }
+ }
+ return output;
+}
+function tc12UnitID(e){return 'bs11-'+norm(e.faction+'-'+e.name).replace(/[^a-z0-9]+/g,'-').slice(0,95);}
+const tc12Index=new Map();
+function tc12Reindex(){tc12Index.clear();for(const payload of tc12.sources.values())for(const x of payload.records||[]){tc12Index.set(x.faction+'|'+x.name.toLowerCase(),x);}}
+function tc12Db(){return new Promise((resolve,reject)=>{
+ if(!('indexedDB' in window)){reject(Error('IndexedDB unavailable'));return;}
+ const req=indexedDB.open('tabletop-command-community-imports',1);
+ req.onupgradeneeded=()=>{if(!req.result.objectStoreNames.contains('sources'))req.result.createObjectStore('sources',{keyPath:'key'});};
+ req.onerror=()=>reject(req.error||Error('Database unavailable'));req.onsuccess=()=>resolve(req.result);
+});}
+async function tc12Persist(payload){try{const db=await tc12Db();await new Promise((resolve,reject)=>{const tx=db.transaction('sources','readwrite');tx.objectStore('sources').put(payload);tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error);});db.close();return true;}catch(e){console.warn('Could not persist imported profiles:',e);return false;}}
+async function tc12Restore(){try{const db=await tc12Db();const records=await new Promise((resolve,reject)=>{const req=db.transaction('sources','readonly').objectStore('sources').getAll();req.onsuccess=()=>resolve(req.result||[]);req.onerror=()=>reject(req.error);});db.close();for(const record of records)if(Array.isArray(record.records))tc12.sources.set(record.key,record);tc12Reindex();if(records.length&&['datasheets','armies','ttsetup'].includes(ui.route))render();}catch(e){console.warn('Community profile restore unavailable',e);}}
+async function tc12Clear(){if(!confirm('Clear community data downloaded into this browser? Your saved armies and personal datasheet edits will remain.'))return;tc12.sources.clear();tc12Reindex();try{const db=await tc12Db();await new Promise((resolve,reject)=>{const tx=db.transaction('sources','readwrite');tx.objectStore('sources').clear();tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error);});db.close();}catch(e){console.warn(e);}tc12.message='Locally imported community profiles cleared.';render();}
+function tc12Status(s){tc12.message=s;const el=document.querySelector('[data-tc12-status]');if(el)el.textContent=s;}
+async function tc12SyncFaction(faction){
+ if(tc12.loading)return;const files=TC12_FILES[faction]||TC12_FILES[faction.replace(/’/g,"'")];
+ if(!files?.length){toast('No structured source mapping for '+faction+'. Use Import files to load a downloaded catalogue.');return;}
+ tc12.loading=true;tc12.lastError='';tc12Status('Fetching '+files.length+' community catalogue file(s) for '+faction+'…');
+ const loaded=[];let failures=[];
+ for(let i=0;i<files.length;i++){
+  const file=files[i];tc12Status('Downloading '+(i+1)+'/'+files.length+': '+file);
+  try{const ctrl=new AbortController();const time=setTimeout(()=>ctrl.abort(),45000);
+   let response;try{response=await fetch(TC12_RAW+encodeURIComponent(file),{signal:ctrl.signal,cache:'no-cache'});}finally{clearTimeout(time);}
+   if(!response.ok)throw Error('HTTP '+response.status);
+   const doc=await response.json();loaded.push({file,json:doc});
+  }catch(e){failures.push(file+': '+e.message);}
+ }
+ if(loaded.length){try{const records=tc12ExtractUnitData(loaded,faction);
+    const bySource=new Map();for(const record of records){const k=record.file;const arr=bySource.get(k)||[];arr.push(record);bySource.set(k,arr);}
+    for(const item of loaded){const old=tc12.sources.get(item.file);const values=bySource.get(item.file)||[];const payload={key:item.file,records:values,importedAt:new Date().toISOString(),faction:tc12FactionFor(item.json.catalogue,faction),revision:item.json.catalogue?.revision||0};tc12.sources.set(item.file,payload);await tc12Persist(payload);}
+    tc12Reindex();tc12.message=`Imported ${records.length} detailed or partial unit references from ${loaded.length} source files${failures.length?' · '+failures.length+' downloads failed':''}.`;
+   }catch(e){tc12.lastError=e.message;tc12.message='Could not parse community catalogue: '+e.message;}
+ }else tc12.message='Unable to fetch source files. Check connectivity or import a downloaded JSON file.';
+ tc12.loading=false;render();
+}
+async function tc12SyncAll(){
+ if(tc12.loading)return;
+ const files=[...new Set(Object.values(TC12_FILES).flat())];
+ if(!confirm('Download '+files.length+' community source catalogues into this browser? This can use considerable bandwidth and browser storage. Imported data is not official or automatically tournament-valid.'))return;
+ tc12.loading=true;tc12.lastError='';const loaded=[];const failures=[];
+ for(let i=0;i<files.length;i++){
+  const file=files[i];tc12Status('Loading '+(i+1)+'/'+files.length+': '+file);
+  try{const ctrl=new AbortController();const timer=setTimeout(()=>ctrl.abort(),45000);let res;
+   try{res=await fetch(TC12_RAW+encodeURIComponent(file),{signal:ctrl.signal,cache:'no-cache'});}finally{clearTimeout(timer);}
+   if(!res.ok)throw Error('HTTP '+res.status);loaded.push({file,json:await res.json()});
+  }catch(e){failures.push(file+' ('+e.message+')');}
+ }
+ tc12Status('Preparing imported profiles from '+loaded.length+' source catalogues…');await new Promise(r=>setTimeout(r,0));
+ try{
+  const units=tc12ExtractUnitData(loaded,'All factions');const byFile=new Map();for(const unit of units){const arr=byFile.get(unit.file)||[];arr.push(unit);byFile.set(unit.file,arr);}
+  for(const item of loaded){const payload={key:item.file,records:byFile.get(item.file)||[],importedAt:new Date().toISOString(),faction:tc12FactionFor(item.json.catalogue,'Other'),revision:item.json.catalogue?.revision||0};tc12.sources.set(item.file,payload);await tc12Persist(payload);}
+  tc12Reindex();tc12.message='Loaded '+units.length+' unit profiles from '+loaded.length+' catalogues'+(failures.length?'; '+failures.length+' downloads failed':'')+'. Some may remain partial. Check source dates, points, and equipment legality.';
+ }catch(e){tc12.message='Partial catalogue import failed: '+e.message;}
+ tc12.loading=false;render();
+}
+function tc12InstallFileInputs(){if(document.getElementById('tc12-json-input'))return;
+ const input=document.createElement('input');input.type='file';input.id='tc12-json-input';input.accept='.json,application/json';input.multiple=true;input.hidden=true;document.body.appendChild(input);
+ input.addEventListener('change',async()=>{const files=[...input.files];input.value='';if(!files.length)return;
+  tc12.loading=true;tc12Status('Reading '+files.length+' selected catalogue files…');
+  try{const raw=[];for(const file of files){if(file.size>30000000)throw Error(file.name+' exceeds 30 MB');const doc=JSON.parse(await file.text());raw.push({file:file.name,json:doc});}
+   const units=tc12ExtractUnitData(raw,v7.faction);const byFile=new Map();for(const unit of units){const arr=byFile.get(unit.file)||[];arr.push(unit);byFile.set(unit.file,arr);}
+   for(const file of raw){const payload={key:file.file,records:byFile.get(file.file)||[],importedAt:new Date().toISOString(),faction:tc12FactionFor(file.json.catalogue,v7.faction),revision:file.json.catalogue?.revision||0};tc12.sources.set(file.file,payload);await tc12Persist(payload);}
+   tc12Reindex();tc12.message='Imported '+units.length+' unit profiles from your '+files.length+' selected file(s).';
+  }catch(e){tc12.message='Import failed: '+e.message;}tc12.loading=false;render();
+ });
+}
+const TC12_OLD_CATALOG=v7Catalog;
+v7Catalog=function(){const list=TC12_OLD_CATALOG();if(!tc12Index.size)return list;
+ const found=new Set();
+ for(let i=0;i<list.length;i++){
+  const u=list[i];const key=v7Faction(u)+'|'+u.name.toLowerCase();const imported=tc12Index.get(key);
+  if(imported){found.add(key);const pts=data.customPoints?.[v7Faction(u)+'|'+u.name];
+   list[i]={...u,v7Rich:imported,v12Imported:imported,points:Number(pts)>0?Number(pts):(imported.points??u.points),pointsStatus:imported.points!==null?'BSData source (check MFM)':u.pointsStatus,pointsNote:imported.points!==null?'Imported from community roster data':'Previous local reference',models:imported.models||u.models,category:imported.category==='Other'?(u.category||'Other'):imported.category,stats:imported.stats[0]==='—'?u.stats:Object.fromEntries(['move','toughness','save','wounds','leadership','oc'].map((k,j)=>[k,imported.stats[j]]))};
+  }
+ }
+ for(const [key,imported] of tc12Index)if(!found.has(key)){
+  const pts=data.customPoints?.[imported.faction+'|'+imported.name];
+  list.push({id:tc12UnitID(imported),name:imported.name,faction:imported.faction,category:imported.category,role:'Community-imported 11th-edition unit. Review options and official points before building.',type:imported.category,models:imported.models||1,points:Number(pts)>0?Number(pts):(imported.points||0),pointsStatus:imported.points!==null?'BSData source (check MFM)':'unknown',stats:Object.fromEntries(['move','toughness','save','wounds','leadership','oc'].map((k,j)=>[k,imported.stats[j]])),weapons:[],abilities:[],sourceType:'reference',v7Rich:imported,v12Imported:imported});
+ }
+ return list;};
+const TC12_OLD_PROFILE=v7Profile;
+v7Profile=function(u){let html=TC12_OLD_PROFILE(u);if(!u.v12Imported)return html;
+ const e=u.v12Imported;
+ const label=`<div class="tc12-source"><strong>Community-imported reference · ${esc(e.status)}</strong><span>Source: <a href="${esc(e.sourceUrl)}" target="_blank" rel="noopener noreferrer">BSData 11e ${esc(e.file)} ↗</a> · catalogue revision ${esc(e.revision||'?')} · imported ${esc(e.importedAt)}</span><p>These rules were downloaded directly into your browser from a third-party community project. They are not official or independently verified. Weapons listed are <b>possible options, not necessarily equipped together</b>. Recheck points against the official Munitorum Field Manual and confirm legal squad sizes and loadouts before play.</p></div>`;
+ return html.replace('<div class="v7-detail-intro">',label+'<div class="v7-detail-intro">');};
+const TC12_OLD_POINTS=v7Points;
+v7Points=function(u){if(!u.v12Imported)return TC12_OLD_POINTS(u);const e=u.v12Imported,custom=data.customPoints?.[v7Faction(u)+'|'+u.name];const p=Number(custom)>0?Number(custom):e.points;return {...TC12_OLD_POINTS(u),text:Number(p)>0?Number(p)+' pts':'Points unconfirmed',flag:Number(custom)>0?'Personal override':'Community cost · verify MFM'};};
+const TC12_OLD_CARD=v7Card;
+v7Card=function(u,active=false){const html=TC12_OLD_CARD(u,active);return u.v12Imported?html.replace(/<small>(?:Index only|Detailed|Reviewed)<\/small>/g,'<small>Community data</small>'):html;};
+const TC12_OLD_EXPLORER=v7Explorer;
+v7Explorer=function(embed=false){const html=TC12_OLD_EXPLORER(embed);
+ const fac=v7.faction==='All factions'?'Space Marines':v7.faction;
+ const matched=v7Catalog().filter(u=>!!u.v12Imported).length;
+ const mini=`<section class="tc12-import"><div class="tc12-header"><div><strong>More complete datasheets · community import</strong><p>Import structured 11th-edition references directly into this browser. Adds available stats, weapons, abilities, keywords, and points to unit cards. No account needed.</p></div><span class="tc12-count">${matched} imported units</span></div><div class="actions"><button class="btn primary small" type="button" data-tc12-load="${esc(fac)}" ${tc12.loading?'disabled':''}>${tc12.loading?'Importing…':'Load '+esc(fac)+' faction data'}</button><button class="btn ghost small" type="button" data-tc12-all ${tc12.loading?'disabled':''}>Load every faction</button><button class="btn ghost small" type="button" data-tc12-file>Import downloaded JSON</button>${tc12.sources.size?'<button class="btn ghost small" type="button" data-tc12-clear>Clear imported references</button>':''}<a class="btn ghost small" target="_blank" rel="noopener noreferrer" href="${TC12_REPOSITORY}">Browse source ↗</a></div><p class="tc12-status" data-tc12-status role="status">${esc(tc12.message||'Choose a faction above, then load its data. Data stays in this browser and can be refreshed when source files change.')}</p><details><summary>About source accuracy and copyright</summary><p>This optional importer fetches third-party BattleScribe JSON directly when you request it. The website does not bundle third-party rules text or pictures. Imported abilities may contain Games Workshop copyrighted wording; use for personal rules reference, respect the source's terms, and do not republish the imported data. Catalogues can be incomplete or behind current FAQ/points updates; this tool does not automatically validate legal equipment combinations.</p></details></section>`;
+ return html.replace('<div class="v7-catalog-layout">',mini+'<div class="v7-catalog-layout">').replace(/<div class="v8-page-note"><strong>Datasheet accuracy:<\/strong>[\s\S]*?<\/div>/,`<div class="v8-page-note"><strong>Datasheet accuracy:</strong> ${matched} extra community-imported cards available; the remaining profiles may be partial or index-only. Imported rules are third-party references, not guaranteed official. <a href="${esc(V7_OFFICIAL_POINTS)}" target="_blank" rel="noopener">Official points ↗</a></div>`);
+};
+const tc12Style=document.createElement('style');tc12Style.textContent=`
+.tc12-import{margin:13px 0;padding:16px;background:linear-gradient(135deg,#202e36,#172126);border:1px solid #506372;border-radius:13px}.tc12-header{display:flex;justify-content:space-between;align-items:start;gap:12px}.tc12-header strong{font-size:16px}.tc12-header p{color:var(--muted);font-size:12px;margin:6px 0 12px}.tc12-count{color:var(--gold2);font-weight:700;font-size:12px;white-space:nowrap}.tc12-status{font-size:12px;color:var(--muted);margin-top:10px}.tc12-import details{font-size:12px;color:var(--muted);margin-top:10px}.tc12-import summary{cursor:pointer;color:var(--gold2)}.tc12-source{padding:13px;border:1px solid #52636f;border-radius:9px;background:#1d2b33;margin:8px 0 14px;font-size:12px;display:flex;flex-direction:column;gap:6px;color:var(--muted)}.tc12-source strong{color:var(--gold2);font-size:13px}.tc12-source p{margin:0}.tc12-source a{color:var(--gold2)}@media(max-width:680px){.tc12-header{flex-direction:column;gap:2px}.tc12-count{white-space:normal}}`;
+document.head.appendChild(tc12Style);
+tc12InstallFileInputs();
+document.addEventListener('click',evt=>{const b=evt.target.closest('[data-tc12-load],[data-tc12-all],[data-tc12-file],[data-tc12-clear]');if(!b)return;
+ evt.preventDefault();evt.stopPropagation();if(b.hasAttribute('data-tc12-load'))tc12SyncFaction(b.getAttribute('data-tc12-load'));else if(b.hasAttribute('data-tc12-all'))tc12SyncAll();else if(b.hasAttribute('data-tc12-file'))document.getElementById('tc12-json-input')?.click();else if(b.hasAttribute('data-tc12-clear'))tc12Clear();},true);
+const tc12Brand=document.querySelector('.brand small');if(tc12Brand)tc12Brand.textContent='ARMY BUILDER & MATCH COMPANION · v12';
+const tc12Version=document.querySelector('.version-text');if(tc12Version)tc12Version.textContent='TABLETOP COMMAND · v12 · COMMUNITY DATA IMPORT';
+tc12Restore();render();
 
 })();
 </script>
