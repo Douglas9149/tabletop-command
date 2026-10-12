@@ -86,6 +86,36 @@
 .v8-page-note{background:#182a30;border:1px solid #416371;padding:13px 16px;border-radius:10px;margin:8px 0 20px;color:#d3e9f0}
 .v8-page-note strong{color:#d7ebf4}.v8-page-note a{color:#ffdaa0}
 .v8-version{font-size:11px;color:#d5d1c2;margin:8px 0}
+
+
+/* v11.2: personal and shared libraries */
+.tc112-tabs{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:14px 0 12px;border-bottom:1px solid #405563;padding-bottom:10px}
+.tc112-tab{background:#18262f;border:1px solid #3d5360;border-radius:9px;color:#d3e4ed;font-weight:750;padding:12px 17px;font-size:13px}
+.tc112-tab span{display:inline-block;background:#2a404d;border-radius:100px;font-size:11px;padding:2px 7px;margin-left:5px}
+.tc112-tab.selected{background:#c9a56e;color:#19252c;border-color:#e6c99a}
+.tc112-tab.selected span{background:#e4c899;color:#17242b}
+.tc112-explain{padding:13px 16px;background:#17262f;border:1px solid #405766;border-radius:9px;color:#c3d4da;margin:12px 0 18px;font-size:13px;line-height:1.6}
+.tc112-explain strong,.tc112-explain b{color:#f2e5c7}
+.tc112-ownerhint{display:flex;flex-direction:column;gap:5px;background:#12262b;border:1px solid #37585b;padding:10px 12px;border-radius:9px}
+.tc112-ownerhint strong{font-size:13px;color:#d5eee4}.tc112-ownerhint small{font-size:11px;color:#acbfc3}
+.tc112-shared-actions{display:flex;align-items:center;flex-wrap:wrap;gap:14px;margin:12px 0 18px}
+.tc112-friends-grid{display:grid;grid-template-columns:minmax(195px,.65fr) minmax(0,2fr);gap:16px}
+.tc112-contact-panel,.tc112-shared-list{border:1px solid #415966;background:#15252f;border-radius:12px;padding:17px;min-width:0}
+.tc112-contact-panel h3{font-family:Georgia,serif;font-size:18px;margin:0 0 16px}
+.tc112-contact{display:flex;gap:10px;justify-content:space-between;width:100%;text-align:left;background:#1c303b;color:#d6e6ea;border:1px solid transparent;padding:11px 12px;border-radius:8px;margin:5px 0;font-size:13px}
+.tc112-contact.active{border-color:#dab77f;background:#2b3c47}.tc112-contact span{font-weight:700;color:#e6cb98}
+.tc112-contact-panel .tiny{line-height:1.65;margin:18px 3px 0}
+.tc112-shared-card{border:1px solid #435d6b;background:#21343f;border-radius:9px;padding:16px;margin-top:11px}
+.tc112-shared-card h3{font-family:Georgia,serif;font-size:20px;font-weight:500;margin:6px 0}
+.tc112-shared-card .actions{display:flex;flex-wrap:wrap;gap:7px;margin-top:10px}
+.tc112-empty{text-align:center;border:1px dashed #45606b;border-radius:10px;padding:30px 20px;margin:12px 0}
+.tc112-empty h3{font-family:Georgia,serif;font-size:22px}
+.tc112-imported-roster{display:grid;gap:8px;max-height:55vh;overflow:auto}
+.tc112-imported-roster>div{display:flex;justify-content:space-between;gap:15px;border:1px solid #3d5360;border-radius:7px;padding:10px}
+.tc112-imported-roster span{color:#c2cbd1;white-space:nowrap}
+@media(max-width:850px){.tc112-friends-grid{grid-template-columns:1fr}.tc112-contact-panel{display:flex;flex-wrap:wrap;gap:8px;align-items:center}.tc112-contact-panel h3{width:100%}.tc112-contact{width:auto}.tc112-contact-panel .tiny{width:100%}}
+@media(max-width:520px){.tc112-tab{flex:1;padding:11px 10px;font-size:11px}.tc112-tabs{gap:5px}.tc112-shared-card .actions button{flex-grow:1}}
+
 </style>
 <style>/* Tabletop Command v7 — tabletop-first layout upgrades */
 :root{--gold:#9ccce3;--gold2:#e0f0f7}
@@ -2747,7 +2777,116 @@ const tcAccountCss=document.createElement('style');tcAccountCss.textContent=`
 $$('.sidebar [data-route="profile"]').forEach(el=>el.remove()); // Account lives in the global header.
 tcAccountSync();
 
-render();save();
+
+// v11.2: Personal army ownership and opt-in friend list imports.
+// Distinct local player labels are NOT online accounts. Never display them as a global roster.
+const tc112={tab:'mine',friend:'all'};
+const tc112OldPage=v7ArmiesPage;
+const tc112OldSave=v7SaveWorking;
+const tc112OldNew=v7NewArmy;
+const tc112OldOpen=v7OpenArmy;
+const tc112OldLoad=v7LoadToMatch;
+const tc112OldMatch=v7MatchPlayers;
+// Keep an unsaved legacy working draft before switching the personal builder to 'self'.
+if(v7Working().ownerId!=='self'){
+ if(!data.tc112LegacyDraft)data.tc112LegacyDraft=clone(v7Working());
+ data.v7Working={ownerId:'self',name:'New army',faction:'Space Marines',chapter:'',points:1000,army:[],detachments:[],warlordId:null};
+ v7.armyId='';
+}
+v7.player='self';
+function tc112OwnArmies(){return(data.savedArmies||[]).filter(a=>(a.ownerId||'self')==='self');}
+function tc112SharedArmies(){return(data.savedArmies||[]).filter(a=>(a.ownerId||'self')!=='self');}
+function tc112OwnerName(id){return data.players.find(p=>p.id===id)?.name||'Imported player';}
+function tc112Tabs(){return `<nav class="tc112-tabs" aria-label="Army collections"><button class="tc112-tab ${tc112.tab==='mine'?'selected':''}" data-tc112-tab="mine" aria-current="${tc112.tab==='mine'?'page':'false'}">My armies <span>${tc112OwnArmies().length}</span></button><button class="tc112-tab ${tc112.tab==='shared'?'selected':''}" data-tc112-tab="shared" aria-current="${tc112.tab==='shared'?'page':'false'}">Friends & shared armies <span>${tc112SharedArmies().length}</span></button></nav>`;}
+function tc112ExportPayload(a){
+ return {format:'tabletop-command-army-share',version:1,sharedBy:String(v10?.displayName||'Tabletop player').slice(0,60),army:{...clone(a),ownerId:undefined,id:undefined,created:undefined}};
+}
+function tc112Slug(s){return String(s||'army').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,55)||'army';}
+function tc112DisplaySaved(){
+ v7.player='self';
+ const body=tc112OldPage();
+ const idx=body.indexOf('<div class="v7-army-collection">');
+ if(idx<0)return body;
+ let page=body.slice(idx);
+ page=page.replace('<h3>You’s armies</h3>','<h3>Your armies</h3>').replace('No armies for this player. Create one to begin.','No armies saved in this browser yet. Create one to begin.');
+ // Show owner identity in the global account menu; army ownership cannot be changed to a pretend local profile.
+ page=page.replace(/<label>Owner<select class="field" data-v7-army-field="ownerId">[\s\S]*?<\/select><\/label>/,'<div class="tc112-ownerhint"><strong>My personal army</strong><small>Only your own saved lists appear here. Shared imports are kept separately. Local lists are not account-private on a shared device.</small></div>');
+ page=page.replace(/Owner:\s*[^<]+\s*·\s*New and edited armies stay here until you save them\./,'Personal working army · Changes are saved when you click Save army.');
+ page=page.replace(/(<button class="btn primary small" data-v7-usearmy="([^"]+)">Use in match<\/button>)/g,(_m,button,id)=>`${button}<button class="btn ghost small" data-tc112-export="${esc(id)}">Share file</button><button class="btn ghost small" data-tc112-copy="${esc(id)}">Copy share data</button>`);
+ return `${heading('YOUR COLLECTION','My saved armies','Personal army lists saved in this browser. Other players’ lists appear separately after you import a shared copy.',ttButton('go-ttsetup','Set up a match →','ghost'))}${tc112Tabs()}<p class="tc112-explain">Only lists saved as yours in this browser appear here. If you share a browser with another player, those local lists will still be visible to them. To show someone your list, use <b>Share file</b>; they can import it under <b>Friends & shared armies</b>. These copies remain private to each browser.</p>${page}`;
+}
+function tc112SharedPage(){
+ const all=tc112SharedArmies();
+ const contacts=new Map();
+ for(const a of all){let owner=a.ownerId;let ent=contacts.get(owner)||{id:owner,name:tc112OwnerName(owner),armies:[]};ent.armies.push(a);contacts.set(owner,ent);}
+ if(tc112.friend!=='all'&&!contacts.has(tc112.friend))tc112.friend='all';
+ const selected=tc112.friend==='all'?all:(contacts.get(tc112.friend)?.armies||[]);
+ const contactList=[...contacts.values()].sort((a,b)=>a.name.localeCompare(b.name));
+ return `${heading('SHARED COLLECTION','Friends & shared armies','Browse armies that other people have explicitly shared with you. They are separate from your own army builder.',ttButton('go-ttsetup','Set up a match →','ghost'))}${tc112Tabs()}
+ <div class="tc112-explain"><strong>Sharing is opt-in.</strong> A name here is a <em>local contact label</em>, not a confirmed online friendship. Importing a friend’s army creates a read-only copy for you to inspect or load into a match. It does not grant access to their account or automatically synchronize future edits.</div>
+ <div class="tc112-shared-actions"><button class="btn primary" data-tc112-import>＋ Import a shared army</button><span class="muted tiny">Ask a friend for the JSON file made by <b>Share file</b> on their army card.</span></div>
+ <div class="tc112-friends-grid"><aside class="tc112-contact-panel"><h3>People who shared lists</h3><button class="tc112-contact ${tc112.friend==='all'?'active':''}" data-tc112-friend="all">All shared armies <span>${all.length}</span></button>${contactList.map(c=>`<button class="tc112-contact ${tc112.friend===c.id?'active':''}" data-tc112-friend="${esc(c.id)}">${esc(c.name)} <span>${c.armies.length}</span></button>`).join('')}<p class="muted tiny">No one is added automatically from the website. Contacts appear here when their lists are imported, including old locally stored lists from earlier versions.</p></aside>
+ <section class="tc112-shared-list"><div class="v7-panel-head"><h3>${tc112.friend==='all'?'Armies shared with you':esc(tc112OwnerName(tc112.friend))+'’s armies'}</h3><span class="muted tiny">${selected.length} saved copies</span></div>${selected.map(a=>`<article class="tc112-shared-card"><div class="eyebrow">${esc(tc112OwnerName(a.ownerId))} · ${esc(a.chapter||a.faction||'Faction unknown')}</div><h3>${esc(a.name||'Unnamed army')}</h3><p class="muted">${Array.isArray(a.army)?a.army.length:0} units · <strong>${ttCost(a.army||[])} pts</strong> · ${a.tc112Shared?'Imported share':'Older local list'}</p><div class="actions"><button class="btn ghost small" data-tc112-view="${esc(a.id)}">View roster</button><button class="btn ghost small" data-tc112-duplicate="${esc(a.id)}">Copy to my armies</button><button class="btn primary small" data-tc112-use="${esc(a.id)}">Use in match</button><button class="btn danger small" data-tc112-delete="${esc(a.id)}">Remove copy</button></div></article>`).join('')||'<div class="tc112-empty"><h3>No shared armies yet</h3><p>A friend can open their army, choose <b>Share file</b>, and send you that JSON file. Import it here to see their roster. You do not need to be signed in just to import a copy.</p><button class="btn primary" data-tc112-import>Import a friend’s army</button></div>'}</section></div>`;
+}
+v7ArmiesPage=function(){return tc112.tab==='shared'?tc112SharedPage():tc112DisplaySaved();};
+v7NewArmy=function(){tc112.tab='mine';return tc112OldNew('self');};
+v7SaveWorking=function(){let w=v7Working();w.ownerId='self';let existing=data.savedArmies.find(a=>a.id===v7.armyId);if(existing&&(existing.ownerId||'self')!=='self')v7.armyId='';return tc112OldSave();};
+v7OpenArmy=function(id){const a=data.savedArmies.find(x=>x.id===id);if(!a||(a.ownerId||'self')!=='self')return toast('Shared armies are read-only. Copy one to My armies to edit it.');tc112.tab='mine';return tc112OldOpen(id);};
+v7LoadToMatch=function(aid,side,_ownerId){const a=data.savedArmies.find(x=>x.id===aid);if(!a)return;return tc112OldLoad(aid,side,a.ownerId||'self');};
+// Match setup is per battle: either side may load a local saved or explicitly shared list.
+v7MatchPlayers=function(d){
+ const grouped=tc112OwnArmies();const imports=tc112SharedArmies();
+ const options=(p)=>`<option value="">Build a new match roster</option><optgroup label="My saved armies">${grouped.map(a=>`<option value="${esc(a.id)}" ${p.armyId===a.id?'selected':''}>${esc(a.name)} · ${ttCost(a.army||[])} pts</option>`).join('')}</optgroup>${imports.length?`<optgroup label="Shared / imported armies">${imports.map(a=>`<option value="${esc(a.id)}" ${p.armyId===a.id?'selected':''}>${esc(tc112OwnerName(a.ownerId))}: ${esc(a.name)} · ${ttCost(a.army||[])} pts</option>`).join('')}</optgroup>`:''}`;
+ return `<div class="v7-match-players">${['p1','p2'].map((side,i)=>{const p=d[side];return `<section class="v7-player-setup"><div class="eyebrow">PLAYER ${i+1}</div><label>Player name<input class="field" maxlength="50" data-tc112-matchname="${side}" value="${esc(p.name||'Player '+(i+1))}"></label><label>Choose a saved army<select class="field" data-v7-match-army="${side}">${options(p)}</select></label><label>Faction<select class="field" data-v7-match-faction="${side}">${['Space Marines',...new Set(v7Catalog().map(v7Faction))].filter((x,j,a)=>a.indexOf(x)===j).map(f=>`<option ${p.faction===f?'selected':''}>${esc(f)}</option>`).join('')}</select></label><p>${p.army.length} units · <b>${ttCost(p.army)} pts</b> · ${esc(p.chapter||p.faction)}</p></section>`;}).join('')}</div><div class="v7-fieldrow"><label>Match name<input class="field" data-v7-match-setting="name" value="${esc(d.name)}"></label><label>Battle size<select class="field" data-v7-match-setting="points">${[500,1000,2000,3000].map(p=>`<option value="${p}" ${d.points===p?'selected':''}>${p} points${p===500?' · teaching format':''}</option>`).join('')}</select></label></div><div class="v7-learning"><b>Choose who plays and which list they use.</b> Match rosters can be adjusted without changing saved armies. For an <b>online room</b>, your friend chooses their own army on their own device; you do not need to import their list first.</div>`;
+};
+function tc112ImportModal(){
+ openModal('Import an army shared by a friend',`<p class="muted">Import a JSON share file sent to you by its owner. This creates a read-only local copy and does not add you to their online account.</p><label class="form-field">Select a shared-army JSON file<input class="field" type="file" accept=".json,application/json" data-tc112-file></label><label class="form-field">Or paste shared-army JSON<textarea class="field" data-tc112-json name="json" rows="6" maxlength="350000" placeholder="Paste the JSON share data here"></textarea></label><label class="form-field">Shared by (optional contact name)<input class="field" maxlength="60" name="contact" placeholder="Read from file if blank"></label><p class="tiny muted">Only import files you trust. Existing armies stay untouched. An imported army will not update when the original owner changes theirs.</p>`,form=>{
+   let raw=String(new FormData(form).get('json')||'').trim();if(raw.length<5||raw.length>350000)return toast('Choose a shared-army file or paste its JSON.');
+   let payload;try{payload=JSON.parse(raw);}catch{return toast('The file is not valid JSON.');}
+   const a=payload?.format==='tabletop-command-army-share'?payload.army:payload;
+   if(!a||typeof a!=='object'||Array.isArray(a)||!Array.isArray(a.army)||a.army.length>100||typeof a.name!=='string'||a.name.length>120||!a.name.trim())return toast('Not a supported Tabletop Command army share.');
+   const rawName=String(new FormData(form).get('contact')||payload.sharedBy||'Unknown player').trim().slice(0,60);
+   const friendName=rawName==='You'?'Shared player':(rawName||'Shared player');
+   let contact=data.players.find(x=>x.id!=='self'&&x.name.toLowerCase()===friendName.toLowerCase());
+   if(!contact){contact={id:uid('friend'),name:friendName};data.players.push(contact);}
+   const safe=clone(a);
+   safe.id=uid('sharedarmy');safe.ownerId=contact.id;safe.name=safe.name.slice(0,120);safe.faction=String(safe.faction||'Space Marines').slice(0,70);safe.chapter=String(safe.chapter||safe.faction).slice(0,70);safe.points=Math.max(0,Math.min(15000,Number(safe.points)||1000));
+   safe.army=safe.army.map(u=>({...u,id:uid('sharedunit'),name:String(u?.name||'Unnamed unit').slice(0,120),models:Math.max(1,Math.min(200,Number(u?.models)||1)),points:Math.max(0,Math.min(10000,Number(u?.points)||0))}));
+   safe.tc112Shared=true;safe.created=today();delete safe.email;delete safe.user_id;delete safe.auth;
+   data.savedArmies.push(safe);tc112.tab='shared';tc112.friend=contact.id;save();closeModal();render();toast('Imported '+safe.name+' from '+friendName+'.');
+ },{submitText:'Import army'});
+}
+async function tc112CopyArmy(id){
+ const a=tc112OwnArmies().find(x=>x.id===id);if(!a)return;
+ const raw=JSON.stringify(tc112ExportPayload(a),null,2);
+ try{await navigator.clipboard.writeText(raw);toast('Army data copied. Paste it into a message for your friend.');}catch{
+  openModal('Copy shared army data',`<p>Copy the text below and send it to a friend to import under their Shared Armies page.</p><textarea class="field" rows="9" readonly>${esc(raw)}</textarea>`,()=>closeModal(),{submitText:'Done'});
+ }
+}
+function tc112Handle(t){
+ if(t.tc112Tab){tc112.tab=t.tc112Tab;v7.player='self';render();return true;}
+ if(t.tc112Friend){tc112.friend=t.tc112Friend;render();return true;}
+ if(t.tc112Import!==undefined){tc112ImportModal();return true;}
+ if(t.tc112Export){const a=tc112OwnArmies().find(x=>x.id===t.tc112Export);if(a){download('tabletop-army-'+tc112Slug(a.name)+'.json',JSON.stringify(tc112ExportPayload(a),null,2));toast('Shared army file downloaded.');}return true;}
+ if(t.tc112Copy){tc112CopyArmy(t.tc112Copy);return true;}
+ const id=t.tc112Duplicate||t.tc112Use||t.tc112View||t.tc112Delete;
+ if(!id)return false;
+ const a=tc112SharedArmies().find(x=>x.id===id);if(!a)return true;
+ if(t.tc112View){openModal('Roster: '+a.name,`<p class="muted">Shared by ${esc(tc112OwnerName(a.ownerId))} · ${ttCost(a.army||[])} points. Read-only imported copy.</p><div class="tc112-imported-roster">${(a.army||[]).map(u=>`<div><b>${esc(u.name)}</b><span>${Number(u.models)||1} models · ${Number(u.points)||0} pts</span></div>`).join('')}</div>`,()=>closeModal(),{submitText:'Close'});return true;}
+ if(t.tc112Duplicate){const own={...clone(a),id:uid('army'),ownerId:'self',name:a.name+' (my copy)',created:today()};delete own.tc112Shared;data.savedArmies.push(own);save();tc112.tab='mine';tc112OldOpen(own.id);toast('Copied to your armies. Edits will not affect the original shared list.');return true;}
+ if(t.tc112Use){tc112OldLoad(a.id,'p1',a.ownerId);v7ChangeRoute('ttsetup');v7.setupStep=0;render();return true;}
+ if(t.tc112Delete){if(confirm('Remove your local copy of '+a.name+'? The owner’s army will not be affected.')){data.savedArmies=data.savedArmies.filter(x=>x.id!==a.id);save();render();}return true;}
+ return false;
+}
+document.addEventListener('click',e=>{const el=e.target.closest('[data-tc112-tab],[data-tc112-friend],[data-tc112-import],[data-tc112-export],[data-tc112-copy],[data-tc112-view],[data-tc112-duplicate],[data-tc112-use],[data-tc112-delete]');if(!el)return;e.preventDefault();e.stopImmediatePropagation();tc112Handle(el.dataset);},true);
+document.addEventListener('change',e=>{if(e.target?.dataset?.tc112Matchname){ttDraft()[e.target.dataset.tc112Matchname].name=e.target.value.trim().slice(0,50)||'Player';save();return;}if(e.target?.dataset?.tc112File!==undefined){const file=e.target.files?.[0];if(!file)return;if(file.size>350000){toast('File is too large for a shared-army export.');return;}file.text().then(text=>{const field=document.querySelector('[data-tc112-json]');if(field)field.value=text;}).catch(()=>toast('Could not read selected file.'));}},true);
+const tc112Nav=$('.sidebar [data-route="armies"]');if(tc112Nav)tc112Nav.textContent='▥ My armies';
+const tc112Meta=document.querySelector('meta[name="description"]');if(tc112Meta)tc112Meta.content='Build Warhammer armies, share lists with friends and track matches. Fan-made tabletop companion.';
+const tc112Brand=$('.brand small');if(tc112Brand)tc112Brand.textContent='ARMY BUILDER & MATCH COMPANION · v11.2';
+const tc112Version=$('.version-text');if(tc112Version)tc112Version.textContent='TABLETOP COMMAND · v11.2 · PERSONAL & SHARED ARMIES';
+// Persist non-destructive legacy save migration; imported lists are only local until explicitly shared.
+save();render();
+
 })();
 </script>
 </body>
