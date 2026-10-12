@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="dark">
   <meta name="theme-color" content="#101419">
-  <title>Tabletop Command v10 — Build, Learn & Play with Friends</title>
+  <title>Tabletop Command v11.1 — Build, Learn & Play with Friends</title>
   <style>:root{--bg:#0c1015;--sidebar:#12171c;--panel:#171e25;--panel2:#1c252d;--field:#101820;--line:#2a343d;--line2:#35414a;--text:#f0eee8;--muted:#a2aeb7;--faint:#71818e;--gold:#cfaa66;--gold2:#eac88d;--wine:#713840;--blue:#81a9c3;--red:#e18b85;--green:#8fc8a9;--shadow:0 12px 36px #0005;--radius:12px}
 *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--bg);color:var(--text);font:14px/1.48 system-ui,-apple-system,'Segoe UI',sans-serif}button,input,select,textarea{font:inherit}button{cursor:pointer}button:disabled{opacity:.44;cursor:not-allowed}a{color:var(--gold2)}.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)}
 .app-shell{display:grid;grid-template-columns:238px minmax(0,1fr);min-height:100vh}.sidebar{position:sticky;top:0;height:100vh;background:var(--sidebar);border-right:1px solid var(--line);padding:24px 14px 16px;display:flex;flex-direction:column;z-index:5}.brand{display:flex;align-items:center;gap:11px;padding:4px 9px 29px}.brand-mark{width:38px;height:38px;display:grid;place-items:center;background:linear-gradient(135deg,#77533a,#bf9a5c);color:#17191b;font-size:26px;font-weight:900;clip-path:polygon(50% 0,96% 25%,96% 75%,50% 100%,4% 75%,4% 25%)}.brand strong{display:block;font-size:13px;letter-spacing:1.65px}.brand small{display:block;color:var(--faint);font-size:9px;letter-spacing:1.3px;margin-top:2px}.section-label{color:var(--faint);font-weight:750;font-size:10px;letter-spacing:1.5px;padding:0 14px;margin-bottom:12px}.section-gap{margin-top:23px}.main-nav{display:grid;gap:4px}.nav-link{border:0;background:transparent;color:#b7c0c7;text-align:left;padding:12px 14px;border-radius:9px;display:flex;align-items:center;gap:12px;font-weight:600;width:100%;transition:.15s}.nav-link:hover{background:#ffffff0b;color:#fff}.nav-link.active{background:linear-gradient(90deg,#a77f4433,#93734709);color:var(--gold2);border:1px solid #a77f4440}.nav-icon{display:inline-grid;place-items:center;font-size:19px;width:21px;line-height:1}.sidebar-bottom{margin-top:auto;color:var(--faint);font-size:11px;padding:0 8px}.sidebar-bottom p{line-height:1.5}.status-indicator{color:#b5bebc;font-size:11px}.live-dot{display:inline-block;background:var(--green);width:7px;height:7px;border-radius:100%;margin-right:7px;box-shadow:0 0 0 3px #8fc8a916}.version-text{border-top:1px solid var(--line);padding-top:14px;margin-top:16px;letter-spacing:1.2px;font-size:10px}.main-column{min-width:0;display:flex;flex-direction:column}.topbar{position:sticky;top:0;z-index:4;background:#10161be8;backdrop-filter:blur(14px);border-bottom:1px solid var(--line);height:73px;display:flex;align-items:center;gap:16px;padding:0 30px}.breadcrumbs{display:flex;align-items:center;gap:12px;white-space:nowrap;min-width:0}.breadcrumbs span:first-child{font-size:10px;letter-spacing:1.4px;color:var(--faint);font-weight:750}.breadcrumbs b{font-size:14px;font-weight:650;overflow:hidden;text-overflow:ellipsis}.crumb-divider{color:var(--faint)}.top-actions{margin-left:auto;display:flex;align-items:center;gap:18px}.force-switcher{width:210px;background:#1b242b;border:1px solid #35414a;border-radius:8px;padding:9px 12px;color:var(--text);font-weight:650}.autosave{font-size:10px;letter-spacing:.9px;color:var(--faint);white-space:nowrap}.content{width:100%;max-width:1540px;margin:0 auto;padding:36px 36px 64px;flex:1}.footer{margin-top:auto;border-top:1px solid var(--line);padding:16px 36px 22px;color:var(--faint);font-size:11px}.mobile-menu{display:none}
@@ -136,7 +136,15 @@
         <div class="top-actions">
           <label class="sr-only" for="forceSwitcher">Active force</label>
           <select class="force-switcher" id="forceSwitcher"></select>
-          <span class="autosave"><span class="live-dot"></span> SAVED LOCALLY</span>
+          <span class="autosave" title="Your armies and edits save to this browser; signing in does not automatically upload them."><span class="live-dot"></span> LOCAL SAVE</span>
+          <div class="tc-account-wrap" id="tcAccountWrap">
+            <button class="tc-account-trigger" id="tcAccountButton" type="button" data-tc-account="toggle" aria-haspopup="menu" aria-controls="tcAccountMenu" aria-expanded="false" aria-label="Account: sign in or manage profile">
+              <span class="tc-account-avatar" id="tcAccountAvatar" aria-hidden="true">◉</span>
+              <span class="tc-account-label" id="tcAccountLabel">Sign in</span>
+              <span class="tc-account-chevron" aria-hidden="true">⌄</span>
+            </button>
+            <div class="tc-account-menu" id="tcAccountMenu" role="menu" aria-label="Account options" hidden></div>
+          </div>
         </div>
       </header>
       <div id="appContent" class="content" tabindex="-1"></div>
@@ -2115,7 +2123,7 @@ const V9_PREV_RENDER=render;
 render=function(){if(ui.route==='online'){$$('.nav-link').forEach(b=>b.classList.toggle('active',b.dataset.route==='online'));$('#breadcrumb').textContent='Online rooms';$('#forceSwitcher').style.display='none';$('#appContent').innerHTML=v9OnlinePage();return;}V9_PREV_RENDER();};
 const V9_PREV_HOME=v7Home;
 v7Home=function(){let h=V9_PREV_HOME();return h.replace('</section>',`</section><div class="v9-home-online"><div><div class="eyebrow">NEW · ONLINE BATTLES</div><h3>Start a shared match with a friend</h3><p>Invite a second player with a link. Both can track turns, wounds, Battle-shock, CP and VP live.</p></div><button class="btn primary" data-route="online">Play online →</button></div>`);};
-document.addEventListener('change',e=>{let t=e.target.dataset.v9Input;if(!t)return;e.stopImmediatePropagation();if(t==='army')v9.armyId=e.target.value;else if(t==='name')v9.playerName=e.target.value;else if(t==='code')v9.joinCode=e.target.value;render();},true);
+document.addEventListener('change',e=>{let t=e.target.dataset.v9Input;if(!t)return;e.stopImmediatePropagation();if(t==='army')v9.armyId=e.target.value;else if(t==='name')v9.playerName=e.target.value;else if(t==='code')v9.joinCode=e.target.value;if(t==='army')render();},true);
 document.addEventListener('input',e=>{let t=e.target.dataset.v9Input;if(t==='name')v9.playerName=e.target.value;if(t==='code')v9.joinCode=e.target.value;},true);
 window.addEventListener('click',e=>{let b=e.target.closest('[data-v9-act]');if(!b)return;e.stopImmediatePropagation();e.preventDefault();let kind=b.dataset.v9Act;
  if(kind==='create'||kind==='join')return v9ConnectRoom(kind);
@@ -2426,6 +2434,318 @@ const pending=localStorage.getItem('tc_pending_room_v10');if(!v9.joinCode&&pendi
 // Do not require login to render offline pages. Resolve a returning email-link session lazily.
 Promise.resolve().then(()=>v10CheckStatus());
 // ===== end v10 =====
+
+// ===== TABLETOP COMMAND v11: public multiplayer usability =====
+const v11 = { authPurpose:'',authBusy:false,viewUnit:null,rolls:[],info:'',rosterFilter:'all',rosterSearch:'',loginStatus:'' };
+const v11Safe=(s)=>v10Html(s);
+const v11CopyText=async(value,kind)=>{
+ try{if(!navigator.clipboard?.writeText)throw Error('Clipboard unavailable');await navigator.clipboard.writeText(value);toast(`${kind} copied`);}
+ catch(e){window.prompt(`Copy ${kind.toLowerCase()}:`,value);}
+};
+const v11UserLabel=()=>v9.session?.user?.is_anonymous?'Temporary guest':v9.session?.user?.email?'Signed in':'Not signed in';
+const v11Status=()=>v9Configured()?'':'<div class="v7-warning"><b>Online play not yet configured.</b> The site administrator must provide a public Supabase project URL, publishable key, and the multiplayer database setup. You can still create armies and use offline matches.</div>';
+const v11UnitProfile=(u)=>{
+ const found=v7Catalog().find(c=>c.name===u.name&&(v7Faction(c)===u.faction||v7Faction(c)==='Space Marines'||u.faction==='Ultramarines'))||v7Catalog().find(c=>c.name===u.name);
+ const source=found&&V7_SOURCE[found.name]||'';
+ const profile=V7_DETAILS[u.name]||found?.v7Rich||null;
+ const stats=profile?.stats||null;
+ let weapons=profile?.weapons||[];
+ let abilities=profile?.abilities||[];
+ let words=profile?.words||found?.keywords||[];
+ let sourceLink=source?`<a class="btn ghost small" target="_blank" rel="noopener noreferrer" href="${v11Safe(source)}">Full external reference ↗</a>`:'';
+ return `<div class="v11-profile-body"><p class="muted">${v11Safe(u.faction||'Faction not recorded')} · ${v11Safe(u.models)} starting models · ${v11Safe(u.woundsEach)} wounds each · ${v11Safe(u.points||'—')} points</p>
+ ${stats?`<div class="v7-stats">${['M','T','Sv','W','Ld','OC'].map((tag,i)=>`<span><small>${tag}</small><b>${v11Safe(stats[i])}</b></span>`).join('')}</div>`:`<div class="v7-warning">No complete local stat profile is available for this unit. Confirm its current datasheet.</div>`}
+ ${weapons.length?`<h3>Weapon profiles</h3><div class="table-wrap"><table class="table"><thead><tr>${['Weapon','Rng','A','Hit','S','AP','D','Rules'].map(h=>`<th>${h}</th>`).join('')}</tr></thead><tbody>${weapons.slice(0,30).map(w=>`<tr>${(Array.isArray(w)?w:[w.name,w.range,w.attacks,w.skill,w.strength,w.ap,w.damage,Array.isArray(w.keywords)?w.keywords.join(', '):w.keywords]).slice(0,8).map(t=>`<td>${v11Safe(t??'—')}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`:''}
+ <h3>Abilities</h3>${abilities.length?abilities.slice(0,20).map(a=>`<div class="v11-ability"><strong>${v11Safe(Array.isArray(a)?a[0]:a.name)}</strong><p>${v11Safe(Array.isArray(a)?a[1]:a.description||'Effect not verified')}</p></div>`).join(''):'<p class="muted">No locally verified ability text. Open a reference before playing.</p>'}
+ <h3>Keywords</h3><p>${words.length?words.slice(0,28).map(x=>`<span class="v7-keyword">${v11Safe(x)}</span>`).join(' '):'No verified keywords recorded'}</p>
+ ${sourceLink}<p class="tiny muted">Local reference summaries can be incomplete or outdated. Always check the current rules and equipped weapons.</p></div>`;
+};
+// Use a reference profile's verified W characteristic when an army entry lacks it.
+const V11_PREV_ROOM_ARMY=v9RoomArmy;
+v9RoomArmy=function(){
+ const source=data.savedArmies?.find(a=>a.id===v9.armyId);if(!source)return [];
+ return V11_PREV_ROOM_ARMY().map((u,i)=>{
+  const original=(source.army||[])[i]||{};
+  const details=V7_DETAILS[u.name];
+  const profileW=details?.stats?.[3];
+  const ownW=original.woundsEach||original.stats?.wounds;
+  const wounds=Math.max(1,Math.min(30,Number(ownW)||Number(profileW)||Number(u.woundsEach)||1));
+  const models=Math.max(1,Math.min(60,Number(u.models)||1));
+  return {...u,id:`${u.id||'unit'}-${i}`,woundsEach:wounds,hp:models*wounds,models,shock:false};
+ });
+};
+function v11OpenAuth(mode='create'){
+ v11.authPurpose=mode;v11.authBusy=false;v11.loginStatus='';
+ const message='Sign in once to join shared matches and optionally access cloud army backups.';
+ const body=`<p class="muted">${message} Use your email—no password or account setup form is needed. Building armies and using the local game tracker do not require sign-in.</p>
+ <label class="form-field">Email address<input class="field" id="v11LoginEmail" name="email" type="email" autocomplete="email" placeholder="you@example.com" value="${v11Safe(v10.email)}" required></label>
+ <div id="v11AuthNotice" role="status" class="v11-auth-notice">We will send a sign-in link or one-time code to your email.</div>
+ <details class="v11-secondary"><summary>Have a six-digit email code?</summary><label class="form-field">Code<input class="field" name="code" id="v11OtpCode" inputmode="numeric" autocomplete="one-time-code" placeholder="6-digit code"></label><button class="btn ghost small" type="button" data-v11-action="verify-code">Verify code</button></details>
+ <details class="v11-secondary"><summary>Prefer a temporary guest identity?</summary><p class="tiny muted">Guests only work if the site administrator enabled Supabase anonymous sign-ins. Your guest account is tied to this browser and may be lost if you clear its data or sign out. Email is recommended.</p><button class="btn ghost small" type="button" data-v11-action="guest-auth">Use temporary guest (if enabled)</button></details>`;
+ openModal('Sign in to Tabletop Command',body,(form)=>{v11SendEmail(form);},{narrow:true,submitText:'Send sign-in link'});
+}
+function v11SetAuthStatus(message,success=false){v11.loginStatus=message;const root=document.querySelector('#v11AuthNotice');if(root){root.textContent=message;root.classList.toggle('ok',success);}}
+async function v11SendEmail(form){if(v11.authBusy)return;
+ const email=String((form||document.querySelector('#modalForm'))?.elements?.namedItem('email')?.value||'').trim();
+ if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){v11SetAuthStatus('Enter a valid email address.');return;}
+ v11.authBusy=true;v11SetAuthStatus('Sending your sign-in email…');
+ try{const client=await v10GetClient();const {error}=await client.auth.signInWithOtp({email,options:{emailRedirectTo:v10BaseUrl(),shouldCreateUser:true}});if(error)throw error;
+ v10.email=email;localStorage.setItem('tc_pending_room_v10',v9.joinCode||'');v11SetAuthStatus('Check your inbox for the sign-in link or code. After signing in, return here and select your army.',true);
+ }catch(e){v11SetAuthStatus('Could not send sign-in email: '+(e.message||String(e)));}
+ v11.authBusy=false;
+}
+async function v11VerifyCode(){if(v11.authBusy)return;const form=document.querySelector('#modalForm');const email=String(form?.elements?.namedItem('email')?.value||'').trim(),token=String(form?.elements?.namedItem('code')?.value||'').trim();
+ if(!email||!token)return v11SetAuthStatus('Enter both your email address and the code from your email.');
+ v11.authBusy=true;
+ try{const client=await v10GetClient(),{data:authData,error}=await client.auth.verifyOtp({email,token,type:'email'});if(error)throw error;v9.session=authData.session;v10.email=email;closeModal();render();toast('Signed in. Select your army and create or join your room.');}
+ catch(e){v11SetAuthStatus('Verification failed: '+(e.message||String(e)));}
+ v11.authBusy=false;
+}
+async function v11GuestAuth(){if(v11.authBusy)return;v11.authBusy=true;v11SetAuthStatus('Checking guest access…');
+ try{const client=await v10GetClient();const {data:authData,error}=await client.auth.signInAnonymously();if(error)throw error;v9.session=authData.session;closeModal();render();toast('Temporary guest active. This browser stores your guest identity.');}
+ catch(e){v11SetAuthStatus('Guest access is not enabled for this website. Use email sign-in instead. '+(e.message||String(e)));}
+ v11.authBusy=false;
+}
+// Keep signin out of the normal match form and prompt only when creating or joining.
+const V11_PREV_CONNECT=v9ConnectRoom;
+v9ConnectRoom=async function(mode){
+ if(!v9Configured()){toast('Online rooms need an administrator to configure Supabase first.');return;}
+ if(mode==='join'&&!/^[a-z\d-]{5,24}$/i.test(String(v9.joinCode||'').trim())){toast('Enter an invitation code or use the shared room link.');return;}
+ try{await v10GetClient();}catch(e){v9Error(e);return;}
+ if(!v9.session)return v11OpenAuth(mode);
+ if(!String(v9.playerName||v10.displayName||'').trim()){v9.playerName=v10AuthName();}
+ return V11_PREV_CONNECT(mode);
+};
+const V11_PREV_AUTH_PANEL=v10AuthPanel;
+v10AuthPanel=function(compact=false){
+ const active=!!v9.session;
+ return `<section class="card card-pad v11-account-simple"><div class="v7-panel-head"><div><span class="eyebrow">${compact?'ONLINE IDENTITY':'YOUR ACCOUNT'}</span><h2>${active?'Signed in':'Optional account'}</h2></div><span class="v10-status ${active?'ok':'idle'}">${active?'Active':'Local play works without signing in'}</span></div>
+ <p class="muted">${active?`You are using ${v11Safe(v11UserLabel()==='Temporary guest'?'a temporary guest session':v9.session.user.email)}. Your armies remain in this browser unless you upload a cloud backup.`:'Sign in with email to join online rooms and optionally back up your armies. Offline army building does not require an account.'}</p>
+ <div class="actions">${active?'<button class="btn ghost" type="button" data-v10-auth="signout">Sign out</button>':'<button class="btn primary" type="button" data-v11-action="show-auth">Sign in with email</button>'}</div></section>`;
+};
+function v11ArmyOptions(){
+ const available=data.savedArmies||[];
+ return `<option value="">No army selected (training / empty roster)</option>`+available.map(a=>`<option value="${v11Safe(a.id)}" ${v9.armyId===a.id?'selected':''}>${v11Safe(a.name)} · ${v11Safe(a.faction||'Any faction')} · ${ttCost(a.army||[])} pts</option>`).join('');
+}
+function v11Lobby(){
+ const configured=v9Configured(),signed=!!v9.session,code=v9.joinCode||'';
+ return `${heading('PLAY TOGETHER','Play an online match','Host a private two-player table or join a friend. Army lists and wound counters are shared live when Supabase is connected.')}
+ ${v11Status()}
+ <div class="tc-online-hint"><span aria-hidden="true">◉</span><p>${signed?`Signed in as <b>${v11Safe(v10AuthName())}</b>. Manage your account using the profile button in the top-right corner.`:'You can build armies without an account. Sign in using the profile button in the top-right corner before creating or joining an online match.'}</p></div>
+ <section class="card card-pad v11-lobby-controls"><div class="v11-form-grid"><label>Your display name<input class="field" data-v9-input="name" maxlength="40" autocomplete="nickname" placeholder="e.g. Alex" value="${v11Safe(v9.playerName||v10.displayName)}"></label><label>Your saved army<select class="field" data-v9-input="army">${v11ArmyOptions()}</select></label></div>
+ <p class="tiny muted">Build an army under <b>My Saved Armies</b> first, or start an empty training table. Your friend chooses their own army on their device. You can still edit local armies without signing in.</p>
+ <button class="btn ghost small" data-v11-action="open-armies">Browse or build armies →</button></section>
+ <div class="v11-lobby-grid"><section class="card card-pad"><span class="eyebrow">STEP 1 · HOST</span><h2>Create a match</h2><p>Create a room and send the invite link or room code to a friend.</p><button class="btn primary" data-v9-act="create" ${!configured||v9.busy?'disabled':''}>${v9.busy?'Connecting…':'Create private room →'}</button></section>
+ <section class="card card-pad"><span class="eyebrow">STEP 1 · JOIN</span><h2>Join a friend</h2><p>Paste the code from your friend, or simply open their invitation link.</p><div class="v11-join-input"><input class="field" data-v9-input="code" maxlength="24" placeholder="ROOM CODE" autocomplete="off" value="${v11Safe(code)}"><button class="btn primary" data-v9-act="join" ${!configured||v9.busy?'disabled':''}>Join →</button></div></section></div>
+ ${v9.error?`<div class="v7-warning" role="alert">${v11Safe(v9.error)}</div>`:''}
+ <p class="tiny muted">Rooms have two member slots. Invitation holders can join the open slot. Room progress synchronizes online; local army and datasheet edits do not automatically synchronize between friends.</p>`;
+}
+function v11Stats(u){const hp=Math.max(0,Number(u.hp)||0),max=Math.max(1,(Number(u.models)||1)*(Number(u.woundsEach)||1)),w=Math.max(1,Number(u.woundsEach)||1);return {hp,max,w,alive:Math.ceil(hp/w),front:hp?((hp-1)%w)+1:0,damaged:hp<max,dead:hp===0};}
+function v11UnitCard(u,side,editable,finished){const n=v11Stats(u),shocked=!!u.shock;
+ return `<article class="v11-unit-card ${shocked?'shocked':''} ${n.dead?'destroyed':''}"><div class="v11-unit-top"><div><div class="v11-unit-tags"><span class="v11-pill">${v11Safe(u.faction||'Unit')}</span>${n.dead?'<span class="v11-pill danger">Destroyed</span>':shocked?'<span class="v11-pill danger">Battle-shocked</span>':'<span class="v11-pill">Active</span>'}</div><strong class="v11-unit-name">${v11Safe(u.name)}</strong><p class="muted tiny">${v11Safe(u.points||'—')} pts · ${n.alive} of ${u.models} models remaining · ${n.w} wounds/model</p></div><button type="button" class="btn ghost small" data-v11-action="view-unit" data-v11-side="${side}" data-v11-unit="${v11Safe(u.id)}">Datasheet ↗</button></div>
+ <div class="v11-health-line"><span><b>${n.hp}</b> / ${n.max} total W remaining</span><span>${n.dead?'Unit destroyed':`Current model: ${n.front}/${n.w} W`}</span></div><div class="v11-hp-track" role="progressbar" aria-label="${v11Safe(u.name)} wounds" aria-valuemin="0" aria-valuemax="${n.max}" aria-valuenow="${n.hp}"><span style="width:${Math.round(n.hp/n.max*100)}%"></span></div>
+ <div class="v11-unit-actions">${editable&&!finished?`<button class="btn ghost small" type="button" data-v11-action="damage" data-v11-side="${side}" data-v11-unit="${v11Safe(u.id)}" data-v11-amount="1" ${n.dead?'disabled':''}>−1 W</button><button class="btn ghost small" type="button" data-v11-action="damage" data-v11-side="${side}" data-v11-unit="${v11Safe(u.id)}" data-v11-amount="3" ${n.dead?'disabled':''}>−3 W</button><button class="btn ghost small" type="button" data-v11-action="heal" data-v11-side="${side}" data-v11-unit="${v11Safe(u.id)}" data-v11-amount="1" ${n.dead||!n.damaged||n.hp%n.w===0?'disabled':''} title="Heal the current surviving model; cannot bring destroyed models back">+1 W</button><button class="btn ${shocked?'danger':'ghost'} small" type="button" data-v11-action="shock" data-v11-side="${side}" data-v11-unit="${v11Safe(u.id)}">${shocked?'Clear Battle-shock':'Mark Battle-shocked'}</button>`:'<span class="tiny muted">'+(finished?'Match finished':'Only this player can change their units')+'</span>'}
+ <button class="btn ghost small" type="button" data-v11-action="roll-shock" data-v11-side="${side}" data-v11-unit="${v11Safe(u.id)}">Battle-shock test (2D6)</button></div></article>`;
+}
+function v11Room(){
+ const room=v9.room,r=v9MyRoom()||{},side=v9MySide(),host=side==='p1',phase=r.phase||'Command',ready=!!(r.p1?.ready&&r.p2?.ready),finished=!!r.finished,online=!!room?.guest_id;
+ const invite=room?.invite_code||'';
+ const scores=['p1','p2'].map(s=>{const p=r[s]||{},isMine=s===side;return `<section class="card card-pad v11-score"><span class="eyebrow">${s==='p1'?'PLAYER 1 · HOST':'PLAYER 2'}${isMine?' · YOU':''}</span><h2>${v11Safe(p.name||'Waiting for player')}</h2><div class="v11-score-figures"><div><strong>${Math.max(0,Number(p.cp)||0)}</strong><small>COMMAND POINTS</small></div><div><strong>${Math.max(0,Number(p.vp)||0)}</strong><small>VICTORY POINTS</small></div></div>${isMine&&!finished?`<div class="actions"><button class="btn ghost small" data-v9-act="cp" data-delta="-1">−1 CP</button><button class="btn ghost small" data-v9-act="cp" data-delta="1">+1 CP</button><button class="btn ghost small" data-v9-act="vp" data-delta="-1">−1 VP</button><button class="btn ghost small" data-v9-act="vp" data-delta="1">+1 VP</button><button class="btn ${p.ready?'primary':'ghost'} small" data-v9-act="ready">${p.ready?'Ready ✓ · Undo':'Mark ready'}</button></div>`:''}</section>`;}).join('');
+ const rosters=['p1','p2'].map(s=>{const p=r[s]||{},isMe=s===side;
+  return `<section class="card card-pad v11-roster"><div class="v7-panel-head"><div><span class="eyebrow">${isMe?'YOUR ARMY':'OPPONENT’S ARMY'}</span><h2>${v11Safe(p.name||'Player')}'s roster</h2></div><span class="v11-pill">${(p.army||[]).length} units</span></div>
+  ${(p.army||[]).length?`<div class="v11-roster-list">${p.army.map(u=>v11UnitCard(u,s,isMe,finished)).join('')}</div>`:'<div class="v11-roster-empty"><p>No units were selected for this player. Choose a saved army before creating or joining a room to enable wound tracking.</p></div>'}</section>`;
+ }).join('');
+ return `${heading('LIVE ONLINE BATTLE','Shared match','Both players see the same scoreboard, rosters, wounds, Battle-shock and phase. Each player edits only their own side.',`<button class="btn ghost" data-v9-act="leave">Back to online lobby</button>`)}
+ <section class="v11-room-banner"><div><span class="eyebrow">PRIVATE MATCH ROOM</span><div class="v11-code-row"><strong class="v11-room-code" aria-label="Room code ${v11Safe(invite)}">${v11Safe(invite)}</strong><button class="btn primary" data-v11-action="copy-code" title="Copy only room code">Copy code</button><button class="btn ghost" data-v11-action="copy-link">Copy invite link</button></div><p class="muted">${online?'Two players connected':'Waiting for another player. Send the code or link to invite them.'}</p></div><button class="btn ghost small" data-v9-act="refresh">Refresh</button></section>
+ <div class="v11-scores">${scores}</div>
+ <section class="card card-pad v11-phase"><div><span class="eyebrow">${finished?'FINISHED MATCH':'BATTLE ROUND '+(Number(r.round)||1)} · ${v11Safe((r.turn==='p2'?r.p2:r.p1)?.name||'Player')} TURN</span><h2>${v11Safe(phase)} phase</h2><p>${v11Safe(v9PhaseText[phase]||'Follow the applicable rules and mission for this phase.')}</p><small class="muted">${!online?'Waiting for player two.':!ready?'Both players must mark ready before phases advance.':'Both players are ready.'}</small></div><div class="v11-phase-actions"><button class="btn ghost small" data-v11-action="phase-help">How this phase works</button><button class="btn primary" data-v9-act="phase" ${!online||!ready||finished?'disabled':''}>Next phase →</button></div></section>
+ <nav class="v11-roster-tabs" aria-label="Roster view"><button class="btn ${v11.rosterFilter==='all'?'primary':'ghost'} small" data-v11-action="filter-roster" data-v11-filter="all">Both rosters</button><button class="btn ${v11.rosterFilter==='mine'?'primary':'ghost'} small" data-v11-action="filter-roster" data-v11-filter="mine">My army</button><button class="btn ${v11.rosterFilter==='theirs'?'primary':'ghost'} small" data-v11-action="filter-roster" data-v11-filter="theirs">Opponent</button></nav>
+ <div class="v11-rosters">${v11.rosterFilter==='mine'?['p1','p2'].map((s,i)=>s===side?rosters[i]:'').join(''):v11.rosterFilter==='theirs'?['p1','p2'].map((s,i)=>s!==side?rosters[i]:'').join(''):rosters}</div>
+ <section class="card card-pad v11-journal"><div class="v7-panel-head"><div><span class="eyebrow">SAVED TO THE ROOM</span><h3>Match activity</h3></div><div class="actions"><button class="btn ghost small" data-v9-act="note">Add note</button>${host&&!finished?'<button class="btn danger small" data-v9-act="finish">Finish match</button>':''}</div></div><div class="v11-log-list">${(r.log||[]).slice().reverse().slice(0,18).map(x=>`<p class="v9-log"><span>${new Date(x.at).toLocaleTimeString()}</span> ${v11Safe(x.text)}</p>`).join('')||'<p class="muted">Actions will appear here.</p>'}</div></section>
+ <p class="tiny muted">Online room state requires a connection to Supabase. Physical moves, legal targets, line of sight, and full rules validation remain tabletop decisions. The wound counter represents surviving models and their combined remaining wounds; restore only eligible wounds.</p>`;
+}
+// Replace v9/v10 incremental online page patches with a single coherent public flow.
+v9OnlinePage=function(){return v9.room?v11Room():v11Lobby();};
+v9RoomView=function(){return v11Room();};
+// Cosmetic defaults must not contain a particular owner's gaming group.
+const V11_PREV_HOME=v7Home;
+v7Home=function(){return V11_PREV_HOME()
+ .replaceAll('you, Owen, Jason, or anyone else you add','any player using this browser')
+ .replaceAll('for you, Owen, Jason, or anyone else you add','for different players and factions')
+ .replaceAll('Owen, Jason, and You','Each player')
+ .replaceAll('our campaign','a tabletop campaign')
+ .replaceAll('the Gilded Resolutes','the sample Space Marine force');};
+const V11_PREV_SETUP=renderTabletopSetup;
+renderTabletopSetup=function(){return V11_PREV_SETUP().replaceAll('Owen, Jason, and You','Each player').replaceAll('Owen, Jason, or You','each player').replaceAll('e.g. Owen','e.g. Alex').replaceAll('Load 500-point Gilded Resolutes example','Load example Space Marine army').replaceAll('Load 500-point Gilded Resolutes','Load sample Space Marines').replaceAll('Load Gilded Resolutes','Load sample Space Marines');};
+const V11_PREV_PROFILE_PAGE=v10ProfilePage;
+v10ProfilePage=function(){return V11_PREV_PROFILE_PAGE().replaceAll('e.g. Jason','e.g. Alex');};
+const V11_PREV_WALK=renderWalkthrough;
+renderWalkthrough=function(){return V11_PREV_WALK().replaceAll('Gilded Resolutes','Space Marine training force').replaceAll('Gilded Resolutes units','Space Marine training units');};
+function v11FindRoomUnit(side,id){return (v9.room?.state?.[side]?.army||[]).find(x=>x.id===id);}
+function v11ViewUnit(side,id){const u=v11FindRoomUnit(side,id);if(!u){toast('Unit not found in the shared roster.');return;}
+ openModal(`${u.name} · Datasheet`,v11UnitProfile(u),()=>closeModal(),{submitText:'Close'});
+}
+function v11RollShock(side,id){const u=v11FindRoomUnit(side,id);if(!u)return;
+ const details=V7_DETAILS[u.name],ld=details?.stats?.[4],target=Number(String(ld||'').replace('+',''))||null;
+ const one=Math.floor(Math.random()*6)+1,two=Math.floor(Math.random()*6)+1,total=one+two;
+ const pass=target?total>=target:null;
+ openModal(`${u.name} · Battle-shock test`,`<div class="v11-dice-result"><strong>${one} + ${two} = ${total}</strong><p>${target?`Leadership ${v11Safe(ld)} → <b>${pass?'Passed':'Failed'}</b>`:'Leadership value not locally verified: compare the 2D6 total with the unit’s current Leadership.'}</p></div><p>Roll 2D6 against the current Leadership test requirement. This helper does not automatically change the shared Battle-shock marker. The unit owner should mark or clear Battle-shock as required by the rules.</p>`,()=>closeModal(),{narrow:true,submitText:'Close'});
+}
+const v11PhaseHelp={
+ Command:'Each player resolves Command phase abilities and gains the appropriate CP. Check for units required to take Battle-shock tests. A failed test affects OC and other rules until its prescribed expiration. Review mission-specific effects and scoring.',
+ Movement:'Move units up to their current Movement, or resolve Advances and Fall Backs as permitted. Measure distances physically, account for terrain and movement restrictions, and place any eligible reinforcements.',
+ Shooting:'Choose an eligible attacking unit. Select targets, check range and visibility, resolve hits, wounds, saving throws and damage using the correct weapon profiles and modifiers. Record losses in the online roster.',
+ Charge:'Declare legal charge targets, roll 2D6, and confirm the final movement reaches engagement range as required. Apply charge restrictions and terrain interactions from the current rules.',
+ Fight:'Choose eligible units in the correct fight order. Resolve pile-in, attacks, saves and damage, then consolidate where allowed. Track removed models and Battle-shock effects manually.'
+};
+function v11HowPhase(){const phase=v9.room?.state?.phase||'Command';openModal(`${phase} phase · Quick guide`,`<p>${v11Safe(v11PhaseHelp[phase]||'Follow the current rules for this phase.')}</p><p class="tiny muted">This is a general learning checklist; always check the latest rules, mission pack, and faction abilities.</p>`,()=>closeModal(),{submitText:'Close'});}
+async function v11ActionDamage(kind,button){if(!v9.room||v9.busy)return;
+ const side=button.dataset.v11Side,id=button.dataset.v11Unit,unit=v11FindRoomUnit(side,id);if(!unit||side!==v9MySide())return toast('Only the unit owner may edit this roster.');
+ const n=v11Stats(unit),amount=Math.max(1,Math.min(20,Number(button.dataset.v11Amount)||1));
+ if(kind==='heal'&&(n.dead||n.hp%n.w===0))return toast('Healing cannot restore destroyed models in this tracker.');
+ return v9Apply({type:kind,unit_id:id,amount});
+}
+window.addEventListener('click',event=>{const btn=event.target.closest('[data-v11-action]');if(!btn)return;event.preventDefault();event.stopImmediatePropagation();
+ const type=btn.dataset.v11Action;
+ if(type==='copy-code')return v11CopyText(v9.room?.invite_code||'','Room code');
+ if(type==='copy-link')return v11CopyText(v9Link(),'Invitation link');
+ if(type==='show-auth')return v11OpenAuth('create');
+ if(type==='verify-code')return v11VerifyCode();
+ if(type==='guest-auth')return v11GuestAuth();
+ if(type==='profile')return nav('profile');
+ if(type==='open-armies')return nav('armies');
+ if(type==='view-unit')return v11ViewUnit(btn.dataset.v11Side,btn.dataset.v11Unit);
+ if(type==='roll-shock')return v11RollShock(btn.dataset.v11Side,btn.dataset.v11Unit);
+ if(type==='phase-help')return v11HowPhase();
+ if(type==='roll-dice')return v11RoomDice();
+ if(type==='damage'||type==='heal')return v11ActionDamage(type,btn);
+ if(type==='shock'){
+  if(btn.dataset.v11Side!==v9MySide())return toast('Only the unit owner may change Battle-shock.');
+  return v9Apply({type:'shock',unit_id:btn.dataset.v11Unit,amount:1});
+ }
+ if(type==='filter-roster'){v11.rosterFilter=btn.dataset.v11Filter||'all';render();return;}
+},true);
+const v11Css=document.createElement('style');v11Css.textContent=`
+.v11-setup-top{display:flex;align-items:center;justify-content:space-between;gap:18px;background:linear-gradient(105deg,#17343b,#17212c);border:1px solid #4d6c78;border-radius:12px;padding:16px 20px;margin:18px 0}.v11-setup-top strong{font-size:19px;display:block;margin:4px 0}.v11-setup-top p{font-size:12px;color:var(--muted);margin:2px 0}.v11-lobby-controls{margin:15px 0}.v11-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}.v11-form-grid label{display:grid;gap:7px;font-size:12px;color:#d3e2ea;font-weight:700}.v11-lobby-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;margin:16px 0 26px}.v11-lobby-grid .card{display:flex;flex-direction:column;gap:12px}.v11-lobby-grid h2{margin:0;font-size:24px}.v11-lobby-grid p{flex:1;color:var(--muted)}.v11-lobby-grid button{align-self:flex-start}.v11-join-input{display:flex;gap:8px}.v11-join-input input{min-width:0;flex:1;letter-spacing:1px;font-weight:700}.v11-room-banner{display:flex;align-items:center;justify-content:space-between;gap:18px;background:linear-gradient(125deg,#1c424d,#152632);padding:20px 24px;border:1px solid #558d97;border-radius:12px;margin:14px 0 22px}.v11-room-banner p{margin:8px 0 0}.v11-code-row{display:flex;align-items:center;flex-wrap:wrap;gap:10px;margin:8px 0}.v11-room-code{font-size:clamp(23px,3vw,36px);letter-spacing:3px;font-family:ui-monospace,SFMono-Regular,Consolas,monospace;color:#f6da99;user-select:all}.v11-scores{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}.v11-score h2{font:26px Georgia,serif;margin:5px 0 12px}.v11-score-figures{display:flex;gap:35px;margin-bottom:10px}.v11-score-figures div{display:grid;gap:2px}.v11-score-figures strong{font-size:36px;font-variant-numeric:tabular-nums}.v11-score-figures small{font-size:10px;color:#b9c7d3;letter-spacing:.07em}.v11-phase{display:flex;justify-content:space-between;align-items:center;gap:20px;margin:16px 0}.v11-phase h2{font:28px Georgia,serif;margin:5px 0}.v11-phase p{max-width:730px;color:#c9d3db}.v11-phase-actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.v11-roster-tabs{display:flex;gap:8px;flex-wrap:wrap;margin:20px 0 12px}.v11-rosters{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;align-items:start}.v11-roster{min-width:0}.v11-roster h2{font:24px Georgia,serif;margin:4px 0}.v11-roster-list{display:grid;gap:12px;margin-top:15px}.v11-unit-card{min-width:0;padding:14px;border:1px solid #3a505c;background:#13222b;border-radius:10px}.v11-unit-card.shocked{border-color:#e2a28b;background:#3b2728}.v11-unit-card.destroyed{opacity:.74;border-color:#835d5d}.v11-unit-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}.v11-unit-top p{margin:6px 0 0}.v11-unit-name{font-size:17px;display:block;margin-top:7px;overflow-wrap:anywhere}.v11-unit-tags{display:flex;gap:6px;flex-wrap:wrap}.v11-pill{background:#2c414a;border:1px solid #53717e;color:#dbe8f0;padding:3px 7px;border-radius:999px;font-size:10px}.v11-pill.danger{background:#663333;border-color:#b77771;color:#fff2e9}.v11-health-line{display:flex;gap:8px;justify-content:space-between;flex-wrap:wrap;margin:13px 0 5px;font-size:11px;color:#d6e3e9}.v11-health-line b{font-size:17px;color:#f3e1b2}.v11-hp-track{height:9px;background:#3f3335;border:1px solid #725b5b;border-radius:12px;overflow:hidden}.v11-hp-track span{display:block;height:100%;background:#87c9a3;transition:width .16s ease}.v11-unit-actions{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:13px}.v11-unit-actions .btn{font-size:11px;white-space:normal}.v11-journal{margin:22px 0}.v11-journal h3{margin:4px 0}.v11-log-list{max-height:430px;overflow:auto}.v11-roster-empty{padding:20px;border:1px dashed #566a79;border-radius:9px;color:#c5d5df}.v11-auth-notice{font-size:12px;margin:10px 0;border:1px solid #496174;background:#203544;border-radius:8px;padding:11px;line-height:1.5}.v11-auth-notice.ok{border-color:#4d9a79;background:#1d4638}.v11-secondary{border-top:1px solid #3e5866;padding:12px 0;margin:14px 0;font-size:13px}.v11-secondary summary{cursor:pointer;color:#d1e1ee;font-weight:700}.v11-secondary .form-field{margin:12px 0}.v11-profile-body{display:grid;gap:10px;max-height:70vh;overflow:auto}.v11-profile-body .v7-stats{margin:8px 0}.v11-profile-body .v7-keyword{margin-right:5px}.v11-profile-body .v11-ability{padding:10px;background:#192933;border-radius:8px;border:1px solid #3c5662}.v11-profile-body .v11-ability p{margin:5px 0}.v11-dice-result{text-align:center;padding:22px;background:#233842;border-radius:8px}.v11-dice-result strong{font-size:31px;color:#f1dca5}.v11-account-simple .actions{margin:12px 0}.v11-room-banner .btn{white-space:normal}
+@media(max-width:1000px){.v11-rosters,.v11-scores{grid-template-columns:1fr}.v11-phase{align-items:flex-start;flex-direction:column}.v11-lobby-grid{grid-template-columns:1fr}}
+@media(max-width:600px){.v11-form-grid{grid-template-columns:1fr}.v11-room-banner{padding:15px;flex-direction:column;align-items:flex-start}.v11-room-code{font-size:21px;letter-spacing:1.6px;overflow-wrap:anywhere}.v11-setup-top{flex-direction:column;align-items:flex-start}.v11-unit-top{flex-wrap:wrap}.v11-join-input{flex-wrap:wrap}.v11-join-input .field{min-width:150px}.v11-score-figures{gap:24px}.v11-phase-actions{width:100%}.v11-phase-actions .btn{flex:1}.v11-roster-tabs .btn{flex:1}.v11-lobby-grid button{width:100%}}
+`;document.head.appendChild(v11Css);
+const v11Brand=$('.brand small');if(v11Brand)v11Brand.textContent='BUILD · LEARN · PLAY ONLINE · v11.1';
+const v11Version=$('.version-text');if(v11Version)v11Version.textContent='TABLETOP COMMAND · v11.1 · PUBLIC MATCH TOOLS';
+// Hide project-specific old campaign links, preserving any old data in backups.
+$$('[data-route="campaign"], [data-route="roster"], [data-route="director"], [data-route="battle"], [data-route="pregame"]').forEach(el=>el.remove());
+
+// Universal settings: the old archive controls were tied to a private campaign.
+renderSettings=function(){return `${heading('SETTINGS & BACKUPS','Settings & backups','Your armies, local notes and game records belong to you. Export a backup before changing devices or clearing browser data.',btn('export','Download JSON backup','primary'))}
+<div class="grid cols-2"><section class="card card-pad"><span class="eyebrow">YOUR BROWSER</span><h2>Local data and backups</h2><p>Armies and personal datasheet changes are saved in this browser. Download a JSON backup to keep a copy or move it to another device. Importing replaces the local workspace after you confirm.</p><div class="actions">${btn('export','Download backup','primary')}${btn('import','Import backup','ghost')}</div></section>
+<section class="card card-pad"><span class="eyebrow">OPTIONAL ONLINE ACCOUNT</span><h2>Use your profile across devices</h2><p>Online rooms need an email or enabled temporary guest sign-in. Cloud army backups are optional and require the site’s database setup. Simply signing in does not automatically upload local armies.</p><button class="btn ghost" data-v11-action="profile">Player profile & sign-in →</button></section></div>
+<div class="section-head"><h2>Your workspace</h2></div><div class="grid cols-3">${statKPI('Saved armies',(data.savedArmies||[]).length,'Local army lists')}${statKPI('Local matches',(data.tabletopMatches||[]).length,'Games on this device')}${statKPI('Shared keyword definitions',data.rules.length,'Customizable references')}</div>
+<div class="v7-warning" style="margin-top:22px"><b>Rules and privacy:</b> This unofficial community tool is not affiliated with Games Workshop. Some unit entries are incomplete or outdated. Always verify current datasheets and legal army lists. The site is public, but only joined room members should have access to their room’s game data when Supabase policies are properly configured.</div>`;};
+const V11_CLEAN_TUTORIAL=renderWalkthrough;
+renderWalkthrough=function(){return V11_CLEAN_TUTORIAL()
+.replace(/Gilded Resolutes/gi,'Space Marine training force')
+.replace(/Operation Black Signal/gi,'the practice scenario')
+.replace(/Founding Crusade/gi,'practice mission')
+.replace(/Resume the campaign/gi,'Return to match setup')
+.replace(/Return to live campaign/gi,'Return to match setup')
+.replace(/Resume the practice scenario/gi,'Return to match setup')
+.replaceAll('data-action="go-director"','data-action="go-ttsetup"')
+.replaceAll('data-action="go-pregame"','data-action="go-ttsetup"');};
+const V11_CLEAN_GUIDE=renderGuide;
+renderGuide=function(){return V11_CLEAN_GUIDE().replaceAll('data-action="go-director"','data-action="go-ttsetup"').replaceAll('data-action="go-pregame"','data-action="go-ttsetup"').replace(/our campaign/gi,'a normal tabletop game');};
+const V11_CLEAN_RULES=renderRules;
+renderRules=function(){return V11_CLEAN_RULES().replace('Adrian Voss is attached to Squad Pyre.','A Leader may join a permitted Bodyguard unit during Declare Battle Formations.').replace('Gilded Resolutes','Space Marines');};
+const V11_CLEAN_SETUP=renderTabletopSetup;
+renderTabletopSetup=function(){return V11_CLEAN_SETUP().replace('Owen, Jason, and You can each own multiple saved armies.','Each player profile can own multiple saved armies.').replaceAll('Owen, Jason, and You','Each player').replaceAll('e.g. Owen','e.g. Alex');};
+// Casual dice roller for shared-match phases; records results through the existing
+// membership-checked tc_apply_action(note) RPC instead of trusting local UI state.
+function v11RoomDice(){
+ openModal('Shared dice roller',`<p class="muted">Roll dice and record the result in this room’s journal so both players can see it. These are general-purpose rolls; apply modifiers and resolve the game rules yourselves.</p><div class="field-grid"><label class="form-field">Number of dice<input class="field" type="number" name="diceCount" min="1" max="30" value="2" required></label><label class="form-field">Die sides<select class="field" name="faces"><option value="6" selected>D6</option><option value="3">D3</option><option value="10">D10</option><option value="20">D20</option></select></label></div>`,form=>{
+  const values=new FormData(form),n=Math.max(1,Math.min(30,Number(values.get('diceCount'))||2)),faces=Math.max(2,Math.min(20,Number(values.get('faces'))||6));
+  const result=rollDice(n,faces);const sum=result.reduce((a,b)=>a+b,0);closeModal();
+  v9Apply({type:'note',text:`${v10AuthName()} rolled ${n}d${faces}: [${result.join(', ')}] = ${sum}`});
+ },{narrow:true,submitText:'Roll & add to match journal'});
+}
+// Show dice button in the phase panel; no extra backend migration needed.
+const V11_PREV_ROOM=v9RoomView;
+v9RoomView=function(){return V11_PREV_ROOM().replace('data-v11-action="phase-help">How this phase works</button>','data-v11-action="phase-help">How this phase works</button><button class="btn ghost small" data-v11-action="roll-dice">Roll dice</button>');};
+v9OnlinePage=function(){return v9.room?v9RoomView():v11Lobby();};
+
+// Normalize the final rendered setup instructions without touching anyone's saved army names.
+const V11_ROOT_RENDER=render;
+render=function(){V11_ROOT_RENDER();if(ui.route==='ttsetup'){const el=$('#appContent');if(el)el.innerHTML=el.innerHTML.replaceAll('Owen, Jason, and You can each own multiple saved armies.','Each local player profile can own multiple saved armies.').replaceAll('e.g. Owen','e.g. Alex');}};
+// ===== end v11 =====
+
+
+// GLOBAL ACCOUNT MENU (v11.1). Session status is available on every page;
+// local autosave and cloud identity are deliberately separate.
+const tcAccountButton=$('#tcAccountButton');
+const tcAccountMenu=$('#tcAccountMenu');
+let tcAccountMenuOpen=false,tcAuthSubscribed=false;
+function tcAccountClose(){
+ tcAccountMenuOpen=false;
+ tcAccountMenu.hidden=true;
+ tcAccountButton.setAttribute('aria-expanded','false');
+}
+function tcAccountSync(){
+ const user=v9.session?.user,active=!!user,guest=!!user?.is_anonymous;
+ const rawLabel=active?(guest?'Guest account':(v10.displayName||user.user_metadata?.display_name||String(user.email||'').split('@')[0]||'Account')):'Sign in';
+ const label=String(rawLabel).trim().slice(0,24);
+ const initial=active?(guest?'G':(label.charAt(0).toUpperCase()||'A')):'◉';
+ $('#tcAccountLabel').textContent=label;
+ $('#tcAccountAvatar').textContent=initial;
+ tcAccountButton.classList.toggle('is-signed-in',active);
+ tcAccountButton.setAttribute('aria-label',active?`Account: ${label}. Open account options`:'Sign in or open account options');
+ tcAccountMenu.innerHTML=`<div class="tc-account-menu-heading"><span class="tc-account-avatar ${active?'active':''}" aria-hidden="true">${v11Safe(initial)}</span><div><b>${active?v11Safe(label):'Your account'}</b><small>${active?(guest?'Temporary guest identity':v11Safe(user.email||'Signed in')):'Not signed in'}</small></div></div>
+ <p class="tc-account-storage"><span class="live-dot"></span><b>Armies saved in this browser</b><span>Account sign-in does not automatically back them up.</span></p>
+ ${active?`<button role="menuitem" type="button" data-tc-account="profile">Player profile & cloud backups</button><button role="menuitem" type="button" data-tc-account="signout">Sign out</button>`:`<button role="menuitem" type="button" class="tc-account-primary" data-tc-account="signin">Sign in with email</button><button role="menuitem" type="button" data-tc-account="profile">Player profile & cloud backups</button>`}
+ <button role="menuitem" type="button" data-tc-account="backups">Download / restore local data</button>`;
+}
+function tcAccountToggle(){
+ if(tcAccountMenuOpen){tcAccountClose();return;}
+ tcAccountSync();tcAccountMenuOpen=true;tcAccountMenu.hidden=false;
+ tcAccountButton.setAttribute('aria-expanded','true');
+ tcAccountMenu.querySelector('[role="menuitem"]')?.focus();
+}
+window.addEventListener('click',e=>{
+ const target=e.target.closest('[data-tc-account]');
+ if(target){
+   e.preventDefault();e.stopImmediatePropagation();
+   const action=target.dataset.tcAccount;
+   if(action==='toggle')return tcAccountToggle();
+   tcAccountClose();
+   if(action==='signin')return v11OpenAuth('account');
+   if(action==='profile')return nav('profile');
+   if(action==='backups')return nav('settings');
+   if(action==='signout')return v10Act('signout');
+   return;
+ }
+ if(tcAccountMenuOpen && !e.target.closest('#tcAccountWrap'))tcAccountClose();
+},true);
+window.addEventListener('keydown',e=>{
+ if(e.key==='Escape'&&tcAccountMenuOpen){e.preventDefault();tcAccountClose();tcAccountButton.focus();}
+},true);
+const TC_PREV_RENDER=render;
+render=function(){TC_PREV_RENDER();tcAccountSync();};
+// Existing login listeners rerender only on Profile and Online pages. Keep the
+// global header current on any page, including when email redirects finish.
+function tcHookAuth(client){
+ if(!client||tcAuthSubscribed)return;
+ tcAuthSubscribed=true;
+ client.auth.onAuthStateChange((_event,session)=>{
+   v9.session=session;v9.connected=!!session;
+   if(!v10.displayName&&session?.user?.user_metadata?.display_name)v10.displayName=session.user.user_metadata.display_name;
+   tcAccountSync();
+ });
+}
+const TC_PREV_GET_CLIENT=v10GetClient;
+v10GetClient=async function(){const client=await TC_PREV_GET_CLIENT();tcHookAuth(client);tcAccountSync();return client;};
+const tcAccountCss=document.createElement('style');tcAccountCss.textContent=`
+.top-actions{gap:12px}.tc-account-wrap{position:relative;flex:0 0 auto}.tc-account-trigger{display:flex;align-items:center;gap:9px;background:#1c2932;border:1px solid #435765;border-radius:999px;padding:7px 11px 7px 7px;max-width:200px;color:#e6edf0;min-height:43px}.tc-account-trigger:hover,.tc-account-trigger[aria-expanded="true"]{border-color:#cfaa66;background:#25333c}.tc-account-trigger:focus-visible,.tc-account-menu button:focus-visible{outline:2px solid #f1ce83;outline-offset:3px}.tc-account-avatar{display:inline-grid;place-items:center;min-width:28px;width:28px;height:28px;border-radius:50%;border:1px solid #7b918e;background:linear-gradient(130deg,#334551,#29363c);color:#efe2bd;font-weight:800;font-size:14px}.tc-account-trigger.is-signed-in .tc-account-avatar,.tc-account-avatar.active{background:linear-gradient(130deg,#4f8568,#2a5a62);border-color:#90d5a9;color:white}.tc-account-label{font-size:12px;font-weight:750;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}.tc-account-chevron{font-size:16px;color:#b5c3cc;line-height:1}.tc-account-menu{position:absolute;top:calc(100% + 10px);right:0;width:min(320px,calc(100vw - 26px));max-height:calc(100vh - 92px);overflow-y:auto;border:1px solid #647b82;border-radius:13px;background:#19262f;box-shadow:0 20px 60px #000c;z-index:30;padding:10px;color:#eaf0f3}.tc-account-menu[hidden]{display:none}.tc-account-menu-heading{display:flex;gap:12px;align-items:center;padding:8px 8px 13px;border-bottom:1px solid #435763;min-width:0}.tc-account-menu-heading>div{min-width:0}.tc-account-menu-heading b{font-size:14px;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.tc-account-menu-heading small{font-size:11px;color:#b4c3c9;display:block;overflow-wrap:anywhere}.tc-account-storage{padding:12px 8px;margin:0;display:flex;gap:4px 5px;flex-wrap:wrap;font-size:11px;border-bottom:1px solid #374953}.tc-account-storage b{font-size:11px;color:#d9e6eb}.tc-account-storage>span:last-child{width:100%;color:#b3c3cb}.tc-account-menu button[role="menuitem"]{display:block;width:100%;text-align:left;background:transparent;border:0;border-radius:7px;padding:12px;color:#e3edf1;font-size:12px;font-weight:700}.tc-account-menu button[role="menuitem"]:hover{background:#354955}.tc-account-menu button.tc-account-primary{background:#caa66e;color:#162329;margin-top:11px}.tc-account-menu button.tc-account-primary:hover{background:#e5c58f}.tc-online-hint{display:flex;align-items:flex-start;gap:10px;background:#16252d;border:1px solid #455a63;border-radius:10px;padding:12px 15px;margin:14px 0;color:#bdccd4;font-size:12px}.tc-online-hint>span{font-size:18px;color:#c5ad78}.tc-online-hint p{margin:0;line-height:1.55}.tc-online-hint b{color:#e3e8ed}.breadcrumbs{flex:1;min-width:0}.top-actions{margin-left:auto}.topbar{z-index:12}
+@media(max-width:650px){.topbar{padding:0 10px;gap:8px}.tc-account-trigger{min-height:38px;padding:4px 7px;gap:5px;max-width:125px}.tc-account-avatar{min-width:26px;width:26px;height:26px}.tc-account-label{font-size:11px;max-width:56px}.tc-account-chevron{font-size:13px}.breadcrumbs b{font-size:12px}.tc-account-menu{right:-3px}}
+`;document.head.appendChild(tcAccountCss);
+$$('.sidebar [data-route="profile"]').forEach(el=>el.remove()); // Account lives in the global header.
+tcAccountSync();
 
 render();save();
 })();
